@@ -1,0 +1,9 @@
+
+ksb_SG.log
+.idea/
+test.py
+test2.py
+/.venv/
+/output/
+logs/*
+

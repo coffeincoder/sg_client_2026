@@ -1,0 +1,106 @@
+{
+    "Новый сценарий от 2025-09-19 17:02:22": {
+        "scenarioName": "Новый сценарий от 2025-09-19 17:02:22",
+        "ScenarioItems": [
+            {
+                "zone": "зона 1",
+                "file": "На этом этаже не было системы оповещения, поэтому мы протянули сюда кабель и установили тут небольшую антенну, чтобы иметь с НИИ радиосвязь, в случае Самосбора или очередной проверки инспекции.",
+                "file_esp": "ПереднепосредственнымначаломсамосборавовсемкомплексеГиг",
+                "zone_data": {
+                    "name": "зона 1",
+                    "ip": "192.168.116.253",
+                    "isChecked": true,
+                    "is_playing": false,
+                    "is_streaming": false,
+                    "is_sip_running": false,
+                    "is_warning": false,
+                    "is_online": true,
+                    "tooltip_warn_message": "",
+                    "tooltip_message": "connect message",
+                    "zone_type": "",
+                    "subzone1": false,
+                    "subzone2": true,
+                    "subzone1_name": "1",
+                    "subzone2_name": "2"
+                },
+                "file_data": {
+                    "header": "На этом этаже не было системы оповещения, поэтому мы протянули сюда кабель и установили тут небольшую антенну, чтобы иметь с НИИ радиосвязь, в случае Самосбора или очередной проверки инспекции.",
+                    "filename": "fg73366Наэтомэтаженебылосистемыоповещенияпоэтомумыпротянули.mp3",
+                    "text": "На этом этаже не было системы оповещения, поэтому мы протянули сюда кабель и установили тут небольшую антенну, чтобы иметь с НИИ радиосвязь, в случае Самосбора или очередной проверки инспекции.",
+                    "duration": 14,
+                    "create_date": "23.09.2025  17:46",
+                    "current_voice": "fg",
+                    "tag": 0,
+                    "yandex_file": false,
+                    "recognized_file": false,
+                    "filename_esp": "fg59727ПереднепосредственнымначаломсамосборавовсемкомплексеГиг.mp3"
+                }
+            }
+        ]
+    },
+    "": {
+        "scenarioName": "",
+        "ScenarioItems": [
+            {
+                "zone": "зона 1",
+                "file": "канал номер два",
+                "zone_data": {
+                    "name": "зона 1",
+                    "ip": "192.168.116.253",
+                    "isChecked": true,
+                    "is_playing": false,
+                    "is_streaming": false,
+                    "is_sip_running": false,
+                    "is_warning": false,
+                    "is_online": true,
+                    "tooltip_warn_message": "",
+                    "tooltip_message": "connect message",
+                    "zone_type": "",
+                    "subzone1": true,
+                    "subzone2": true,
+                    "subzone1_name": "екек",
+                    "subzone2_name": "еукеуке"
+                },
+                "file_data": {
+                    "header": "канал номер два",
+                    "filename": "fg48718каналномердва.mp3",
+                    "text": "канал номер два",
+                    "duration": 2,
+                    "create_date": "19.09.2025  17:35",
+                    "current_voice": "fg",
+                    "tag": 0,
+                    "yandex_file": false,
+                    "recognized_file": false
+                }
+            }
+        ]
+    },
+    "Новый сценарий от 2025-09-19 17:02": {
+        "scenarioName": "Новый сценарий от 2025-09-19 17:02",
+        "ScenarioItems": [
+            {
+                "zone": "зона 1",
+                "file": "",
+                "file_esp": "",
+                "zone_data": {
+                    "name": "зона 1",
+                    "ip": "192.168.116.253",
+                    "isChecked": true,
+                    "is_playing": false,
+                    "is_streaming": false,
+                    "is_sip_running": false,
+                    "is_warning": false,
+                    "is_online": true,
+                    "tooltip_warn_message": "",
+                    "tooltip_message": "connect message",
+                    "zone_type": "",
+                    "subzone1": false,
+                    "subzone2": true,
+                    "subzone1_name": "1",
+                    "subzone2_name": "2"
+                },
+                "file_data": null
+            }
+        ]
+    }
+}

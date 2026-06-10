@@ -1,0 +1,70 @@
+[
+    {
+        "header": "Внимание! Проверка оповещений",
+        "filename": "fg04926ВниманиеПроверкаоповещений.mp3",
+        "text": "Внимание! Проверка оповещений",
+        "duration": 3,
+        "create_date": "24.09.2025  09:01",
+        "current_voice": "fg",
+        "tag": 0,
+        "yandex_file": false,
+        "recognized_file": false
+    },
+    {
+        "header": "синус 0 Дб — 1 Кгц (www (mp3cut.net) (1).mp3",
+        "filename": "синус 0 Дб — 1 Кгц (www (mp3cut.net) (1).mp3",
+        "text": "Пользовательский файл из C:/Users/coffe/Downloads/синус 0 Дб — 1 Кгц (www (mp3cut.net) (1).mp3",
+        "duration": 20,
+        "create_date": "23.09.2025  18:03",
+        "current_voice": null,
+        "tag": 0,
+        "yandex_file": false,
+        "recognized_file": false
+    },
+    {
+        "header": "На этом этаже не было системы оповещения, поэтому мы протянули сюда кабель и установили тут небольшую антенну, чтобы иметь с НИИ радиосвязь, в случае Самосбора или очередной проверки инспекции.",
+        "filename": "fg73366Наэтомэтаженебылосистемыоповещенияпоэтомумыпротянули.mp3",
+        "text": "На этом этаже не было системы оповещения, поэтому мы протянули сюда кабель и установили тут небольшую антенну, чтобы иметь с НИИ радиосвязь, в случае Самосбора или очередной проверки инспекции.",
+        "duration": 14,
+        "create_date": "23.09.2025  17:46",
+        "current_voice": "fg",
+        "tag": 0,
+        "yandex_file": false,
+        "recognized_file": false,
+        "filename_esp": "fg59727ПереднепосредственнымначаломсамосборавовсемкомплексеГиг.mp3"
+    },
+    {
+        "header": "СветануэтоещевучблокебылоГигахрущбесконеченВерне",
+        "filename": "fg31392СветануэтоещевучблокебылоГигахрущбесконеченВерне.mp3",
+        "text": "Пользовательский файл из res\\yandex\\mp3\\fg31392СветануэтоещевучблокебылоГигахрущбесконеченВерне.mp3",
+        "duration": 17,
+        "create_date": "23.09.2025  17:29",
+        "current_voice": null,
+        "tag": 0,
+        "yandex_file": false,
+        "recognized_file": false,
+        "filename_esp": "fg59727ПереднепосредственнымначаломсамосборавовсемкомплексеГиг.mp3"
+    },
+    {
+        "header": "ПереднепосредственнымначаломсамосборавовсемкомплексеГиг",
+        "filename": "fg59727ПереднепосредственнымначаломсамосборавовсемкомплексеГиг.mp3",
+        "text": "Пользовательский файл из res\\yandex\\mp3\\fg59727ПереднепосредственнымначаломсамосборавовсемкомплексеГиг.mp3",
+        "duration": 38,
+        "create_date": "23.09.2025  16:23",
+        "current_voice": null,
+        "tag": 0,
+        "yandex_file": false,
+        "recognized_file": false
+    },
+    {
+        "header": "синус 0 Дб — 1 Кгц (www.lightaudio.ru).mp3",
+        "filename": "синус 0 Дб — 1 Кгц (www.lightaudio.ru).mp3",
+        "text": "Пользовательский файл из C:/Users/coffe/Downloads/синус 0 Дб — 1 Кгц (www.lightaudio.ru).mp3",
+        "duration": 120,
+        "create_date": "19.09.2025  16:21",
+        "current_voice": null,
+        "tag": 0,
+        "yandex_file": false,
+        "recognized_file": false
+    }
+]
