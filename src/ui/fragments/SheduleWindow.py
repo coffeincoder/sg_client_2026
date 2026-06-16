@@ -18,7 +18,7 @@ from PyQt5.QtWidgets import (
 from PyQt5.QtCore import Qt, QTime
 
 import paths
-from src.operation_with_scenaries.Sheduler import Sheduler
+from src.operation_with_scenaries.Scheduler import Scheduler
 
 
 class ScheduleWindow(QMainWindow):
