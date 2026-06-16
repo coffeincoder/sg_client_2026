@@ -9,7 +9,7 @@ from PyQt5.QtCore import QThread
 from watchdog.observers import Observer
 from watchdog.events import FileSystemEventHandler
 
-class Sheduler(QThread):
+class Scheduler(QThread):
     def __init__(self, path, callback):
         super().__init__()
         self.path = path
@@ -20,17 +20,29 @@ class Sheduler(QThread):
         self.load_schedules()
 
     def load_schedules(self):
-        print("Загрузка расписаний...")
-        self.schedules.clear()
-        schedule.clear()  # Очистка существующих задач
-        for filename in os.listdir(self.path):
-            if filename.endswith(".json"):
-                file_path = os.path.join(self.path, filename)
-                with open(file_path, 'r', encoding='utf-8') as json_file:
-                    schedule_data = json.load(json_file)
-                    self.schedules.append((schedule_data, filename))
-                    print(f"Загружено расписание из файла: {filename}")
-        self.schedule_tasks()  # Запланировать задачи после загрузки
+        try:
+            print("Загрузка расписаний...")
+            self.schedules.clear()
+            schedule.clear()  # Очистка существующих задач
+
+            for filename in os.listdir(self.path):
+                if filename.endswith(".json"):
+                    file_path = os.path.join(self.path, filename)
+                    with open(file_path, 'r', encoding='utf-8') as json_file:
+                        schedule_data = json.load(json_file)
+                        self.schedules.append((schedule_data, filename))
+                        print(f"Загружено расписание из файла: {filename}")
+
+            self.schedule_tasks()  # Запланировать задачи после загрузки
+
+        except FileNotFoundError:
+            self._create_new_schedule_dir()
+
+
+    def _create_new_schedule_dir(self):
+        os.mkdir(self.path)
+        self.load_schedules()
+
 
     def schedule_tasks(self):
         print("Запланированные задачи очищены.")

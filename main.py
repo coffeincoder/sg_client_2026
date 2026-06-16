@@ -40,7 +40,7 @@ from src.network.ConnectionThread import ConnectionThread
 from src.data.OrangeStatus import OrangeStatus
 from src.network.StatusSender import StatusSender
 from src.network.UploadStaticFiles import UploadStaticFiles
-from src.operation_with_scenaries.Sheduler import Sheduler, FileChangeHandler
+from src.operation_with_scenaries.Scheduler import Scheduler, FileChangeHandler
 from src.ui.custom.WaveFormViewer import VolumeVisualiser
 from src.ui.fragments.ZoneLayoutManager import ZoneLayoutManager
 from src.utils.LogManager import LogManager
@@ -308,7 +308,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Устанавливаем размеры окна равными размерам экрана
         self.setGeometry(0, 0, width, height)
-        self.sheduler = Sheduler(paths.shedule_data_scenaries, self.on_task_executed)
+        self.sheduler = Scheduler(paths.shedule_data_scenaries, self.on_task_executed)
         self.sheduler.start()
 
         # Set up file monitoring

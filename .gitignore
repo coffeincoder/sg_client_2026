@@ -7,3 +7,18 @@ test2.py
 /output/
 logs/*
 
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Виртуальное окружение
+venv/
+.venv/
+env/
+
+# Файл-замок приложения (создаётся при запуске, не код)
+app_lock.txt
+
+# Логи
+*.log
