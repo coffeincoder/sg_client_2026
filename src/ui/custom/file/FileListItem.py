@@ -25,6 +25,8 @@ class FileListItem(QWidget):
     def initUI(self):
         # Создайте рамку
         self.file_item_container = QVBoxLayout()
+        self.setObjectName("fileCard")  # облик карточки — общий QSS (src/ui/theme.py)
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(file_list_item_style())
 
         self.menu_button = QToolButton(self)
@@ -81,19 +83,19 @@ class FileListItem(QWidget):
         self.file_item_text_area = ScrollLabel(self)
         self.file_item_text_area.setText(self.file_item.text)
         self.file_item_text_area.setObjectName("text_text")
-        self.file_item_text_area.setMinimumHeight(60)
-        self.file_item_text_area.setMaximumHeight(100)
+        self.file_item_text_area.setMinimumHeight(40)
+        self.file_item_text_area.setMaximumHeight(70)
 
         self.duration_label = QLabel(f"длительность: {str(self.file_item.duration)}сек.")
         self.duration_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.duration_label.setStyleSheet(duration_label_style())
-        self.duration_label.setWordWrap(True)
+        self.duration_label.setWordWrap(False)
         self.duration_label.setFont(QFont("Arial", 10))
 
         self.create_date_label = QLabel("Дата создания: " + str(self.file_item.create_date))
         self.create_date_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.create_date_label.setStyleSheet(create_date_label_style1())
-        self.create_date_label.setWordWrap(True)
+        self.create_date_label.setWordWrap(False)
         self.create_date_label.setFont(QFont("Arial", 10))
 
         self.header_layout = QHBoxLayout()
@@ -116,7 +118,7 @@ class FileListItem(QWidget):
                 current_voice = "женский нейтральный"
 
             self.current_voice_label = QLabel(f"голос: {current_voice}")
-            self.current_voice_label.setWordWrap(True)
+            self.current_voice_label.setWordWrap(False)
             self.current_voice_label.setFont(QFont("Arial", 10))
             self.current_voice_label.setStyleSheet(voice_label_style())
 
@@ -124,6 +126,10 @@ class FileListItem(QWidget):
 
             self.bottom_info_layout.addWidget(self.current_voice_label)
 
+        self.bottom_info_layout.addStretch()  # чипы компактные, прижаты влево
+
+        self.file_item_container.setContentsMargins(14, 12, 14, 12)
+        self.file_item_container.setSpacing(8)
         self.file_item_container.addLayout(self.header_layout)
         self.file_item_container.addWidget(self.file_item_text_area)
         self.file_item_container.addLayout(self.bottom_info_layout)

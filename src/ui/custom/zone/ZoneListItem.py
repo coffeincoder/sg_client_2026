@@ -54,6 +54,8 @@ class ZoneListItem(QWidget):
         self.initUI()
 
     def initUI(self):
+        self.setObjectName("zoneCard")  # облик карточки — общий QSS (src/ui/theme.py)
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(zone_list_item_style())
 
         # Настройка основных элементов
