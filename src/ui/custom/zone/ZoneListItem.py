@@ -13,7 +13,8 @@ from src.data.ZoneModel import Orange
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtGui import QFont
 
-from src.ui.style_sheets import list_widget_header_style, zone_list_item_style, blue_color_btn, zone_item_btn
+from src.ui.style_sheets import list_widget_header_style, zone_list_item_style, blue_color_btn, zone_item_btn, _get_theme
+from src.ui.theme import tokens_for
 
 logger = logging.getLogger(__name__)
 
@@ -91,12 +92,12 @@ class ZoneListItem(QWidget):
 
         # Кнопки управления
         self.delete_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}delete-forever-outline-custom.png"))
-        self.delete_zone_btn.setIconSize(QSize(26, 26))
+        self.delete_zone_btn.setIconSize(QSize(28, 28))
         self.delete_zone_btn.pressed.connect(self.delete_zone)
         self.delete_zone_btn.setStyleSheet(zone_item_btn())
 
         self.rename_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}rename.png"))
-        self.rename_zone_btn.setIconSize(QSize(26, 26))
+        self.rename_zone_btn.setIconSize(QSize(28, 28))
         self.rename_zone_btn.pressed.connect(self.rename_zone)
         self.rename_zone_btn.setStyleSheet(zone_item_btn())
 
@@ -131,7 +132,7 @@ class ZoneListItem(QWidget):
         self.subzones_layout.setContentsMargins(10, 5, 5, 5)
 
         self.subzones_container.setLayout(self.subzones_layout)
-        self.subzones_container.setStyleSheet("background-color: rgba(200, 200, 200, 30); border-radius: 5px;")
+        self.subzones_container.setStyleSheet("background: transparent;")
 
         # Компоновка элементов
         self.zone_info_layout.addWidget(self.zone_ip_label)
@@ -156,6 +157,31 @@ class ZoneListItem(QWidget):
         self.zone_container.setContentsMargins(5, 5, 5, 5)
 
         self.setLayout(self.zone_container)
+        self._refresh_accents()
+
+    def _refresh_accents(self):
+        """Акценты: цветной статус, приглушённый IP, акцентная грань у выбранной зоны."""
+        t = tokens_for(_get_theme())
+        if self.zone.is_playing:
+            color, text = t.accent, "▶ Играет"
+        elif self.zone.is_streaming:
+            color, text = t.accent, "🎙 Вещание"
+        elif self.zone.is_sip_running:
+            color, text = t.accent, "📞 Звонок"
+        elif self.zone.is_online:
+            color, text = t.online, "● Онлайн"
+        else:
+            color, text = t.muted, "● Не в сети"
+        self.online_status_label.setText(text)
+        self.online_status_label.setStyleSheet(f"color: {color}; font-weight: 600; background: transparent;")
+        self.zone_ip_label.setStyleSheet(f"color: {t.muted}; background: transparent;")
+        if self.zone.isChecked:
+            self.setStyleSheet(
+                f"QWidget#zoneCard {{ background: {t.card}; border: 1px solid {t.border};"
+                f" border-left: 3px solid {t.accent}; border-radius: 12px; }}"
+            )
+        else:
+            self.setStyleSheet("")
 
     def update_subzone_labels(self):
         """Обновляет названия подзон из данных зоны"""
@@ -175,6 +201,7 @@ class ZoneListItem(QWidget):
         self.zone_ip_label.setText(zone.ip)
         self.zone_name_label.setText(zone.name)
         self.update_status_indicator()
+        self._refresh_accents()
 
     def update_status_indicator(self):
         if self.zone.is_playing:
@@ -202,6 +229,7 @@ class ZoneListItem(QWidget):
         self.subzone1_checkbox.setEnabled(self.zone.isChecked)
         self.subzone2_checkbox.setEnabled(self.zone.isChecked)
         self.save_zone_state()
+        self._refresh_accents()
 
     def update_subzone1_state(self, state):
         self.zone.subzone1 = state == Qt.Checked

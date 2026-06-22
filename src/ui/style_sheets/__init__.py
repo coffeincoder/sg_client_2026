@@ -31,11 +31,10 @@ def duration_label_style():
     t = _t()
     return f'''
     QLabel {{
-        background-color: {t.elev};
+        background-color: transparent;
         color: {t.muted};
-        padding: 3px 8px;
+        padding: 2px 0px;
         border: none;
-        border-radius: 6px;
     }}
 '''
 
@@ -54,11 +53,11 @@ def voice_label_style():
     t = _t()
     return f'''
             QLabel {{
-                background-color: {t.elev};
+                background-color: transparent;
                 color: {t.accent};
-                padding: 3px 8px;
+                padding: 2px 0px;
                 border: none;
-                border-radius: 6px;
+                font-weight: 600;
             }}
         '''
 

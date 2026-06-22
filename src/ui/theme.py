@@ -80,7 +80,7 @@ QPushButton#ghost {{ background: transparent; }}
 QPushButton#ghost:hover {{ background: {t.elev}; }}
 QPushButton#danger {{ background: {t.danger}; border: none; color: white; font-weight: 600; }}
 QPushButton#danger:hover {{ background: {t.danger_h}; }}
-QPushButton#iconbtn {{ padding: 8px 12px; font-weight: 600; min-width: 18px; }}
+QPushButton#iconbtn {{ padding: 8px 12px; font-weight: 600; font-size: 17px; min-width: 24px; }}
 QPushButton#record {{ background: {t.danger}; border: none; border-radius: 26px;
                       min-width: 52px; min-height: 52px; font-size: 20px; color: white; }}
 QPushButton#record:hover {{ background: {t.danger_h}; }}
