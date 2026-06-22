@@ -20,7 +20,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QFont
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QPushButton, QSlider, QCheckBox,
     QSpinBox, QFrame, QVBoxLayout, QHBoxLayout, QTabWidget, QLineEdit, QSizePolicy,
@@ -224,21 +224,29 @@ def build_right() -> QWidget:
     col.setContentsMargins(0, 0, 0, 0)
     col.setSpacing(12)
 
+    # заголовок отдельной строкой
     head = QHBoxLayout()
-    head.setSpacing(8)
     t = QLabel("Зоны-Устройства")
     t.setObjectName("panelTitle")
     head.addWidget(t)
     head.addStretch()
-    auto = make_btn("", "monitor-speaker.png", obj="iconbtn", icon_px=24, min_h=42)
-    auto.setToolTip("Авто-поиск устройств")
-    add_zone = make_btn("+", obj="iconbtn", min_h=42)
-    add_zone.setToolTip("Добавить зону")
-    refresh = make_btn("", "refresh.png", obj="iconbtn", icon_px=24, min_h=42)
-    refresh.setToolTip("Обновить связь с зонами")
-    for b in (auto, add_zone, refresh):
-        head.addWidget(b)
     col.addLayout(head)
+
+    # понятная панель действий с подписями (как в боевом zone_buttons_layout)
+    tools = QHBoxLayout()
+    tools.setSpacing(8)
+    find = make_btn("Найти", min_h=44)
+    find.setToolTip("Авто-поиск устройств в сети")
+    add_zone = make_btn("+  Добавить", min_h=44)
+    add_zone.setToolTip("Добавить зону вручную")
+    refresh = make_btn("Обновить", "refresh.png", icon_px=22, min_h=44)
+    refresh.setToolTip("Обновить связь с зонами")
+    big = QFont()
+    big.setPointSize(11)
+    for b in (find, add_zone, refresh):
+        b.setFont(big)
+        tools.addWidget(b)
+    col.addLayout(tools)
 
     # реальный список зон с демо-данными
     zone_list = ZoneListWidget()
