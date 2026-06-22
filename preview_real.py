@@ -20,7 +20,7 @@ BASE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, BASE)
 
 from PyQt5.QtCore import Qt, QSize
-from PyQt5.QtGui import QIcon, QPixmap, QFont
+from PyQt5.QtGui import QIcon, QPixmap, QFont, QPainter, QColor
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QPushButton, QSlider, QCheckBox,
     QSpinBox, QFrame, QVBoxLayout, QHBoxLayout, QTabWidget, QLineEdit, QSizePolicy,
@@ -40,12 +40,27 @@ def _icon(name: str) -> QIcon:
     return QIcon(os.path.join(IMG, name))
 
 
-def make_btn(text="", icon_name=None, obj=None, icon_px=26, min_h=44) -> QPushButton:
+def _tinted_icon(name: str, color: str) -> QIcon:
+    """Перекрасить иконку в заданный цвет по её альфа-маске (для иконок на акцентных кнопках)."""
+    src = QPixmap(os.path.join(IMG, name))
+    if src.isNull():
+        return QIcon()
+    pm = QPixmap(src.size())
+    pm.fill(Qt.transparent)
+    p = QPainter(pm)
+    p.drawPixmap(0, 0, src)
+    p.setCompositionMode(QPainter.CompositionMode_SourceIn)
+    p.fillRect(pm.rect(), QColor(color))
+    p.end()
+    return QIcon(pm)
+
+
+def make_btn(text="", icon_name=None, obj=None, icon_px=26, min_h=44, tint=None) -> QPushButton:
     b = QPushButton(text)
     if obj:
         b.setObjectName(obj)
     if icon_name:
-        b.setIcon(_icon(icon_name))
+        b.setIcon(_tinted_icon(icon_name, tint) if tint else _icon(icon_name))
         b.setIconSize(QSize(icon_px, icon_px))
     b.setMinimumHeight(min_h)
     return b
@@ -112,7 +127,7 @@ def build_left() -> QWidget:
     pcl.setContentsMargins(16, 16, 16, 16)
     pcl.setSpacing(12)
     pcl.addWidget(section_label("Воспроизведение"))
-    play = make_btn("  Проиграть", "cast-audio-custom (1).png", obj="primary", icon_px=30, min_h=54)
+    play = make_btn("  Проиграть", "cast-audio-custom (1).png", obj="primary", icon_px=30, min_h=54, tint="#ffffff")
     stop = make_btn("Остановить", min_h=46)
     pcl.addWidget(play)
     pcl.addWidget(stop)
@@ -194,7 +209,7 @@ def build_center() -> QWidget:
     # кнопки добавления — крупные иконки
     add = QHBoxLayout()
     add.setSpacing(8)
-    a1 = make_btn("  Загрузить аудиофайл", "arrow-up.png", obj="primary", icon_px=24, min_h=50)
+    a1 = make_btn("  Загрузить аудиофайл", "arrow-up.png", obj="primary", icon_px=24, min_h=50, tint="#ffffff")
     a2 = make_btn("  Записать с микрофона", "microphone.png", icon_px=26, min_h=50)
     a3 = make_btn("  Озвучить из текста", "text-to-speech.png", icon_px=26, min_h=50)
     add.addWidget(a1)
