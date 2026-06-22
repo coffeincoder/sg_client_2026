@@ -2,23 +2,25 @@
 """
 preview_real.py — превью редизайна на НАСТОЯЩИХ виджетах проекта.
 
-В отличие от preview_redesign.py (пустышка с фейковыми виджетами), здесь
-используются реальные FileListWidget / ZoneListWidget / FileListItem /
-ZoneListItem с демо-данными и применяется общий стиль из src/ui/theme.py.
+Использует реальные FileListWidget / ZoneListWidget / FileListItem /
+ZoneListItem с демо-данными и общий стиль из src/ui/theme.py.
+Только bundled PNG-иконки (res/IMAGES) — без эмодзи, чтобы на всех клиентах
+иконки выглядели одинаково, а не превращались в «кракозябры».
 
-Реальные main.py и UI_MainWindow.py НЕ трогаются — это изолированная витрина,
-чтобы оценить вид до переноса в боевое окно.
+Реальные main.py и UI_MainWindow.py НЕ трогаются.
 
 Запуск:
-    .venv/bin/python preview_real.py            # живое окно
-    QT_QPA_PLATFORM=offscreen .venv/bin/python preview_real.py --shot   # рендер в preview_real.png
+    .venv/bin/python preview_real.py
+    QT_QPA_PLATFORM=offscreen .venv/bin/python preview_real.py --shot
 """
 import os
 import sys
 
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+BASE = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, BASE)
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QSize
+from PyQt5.QtGui import QIcon, QPixmap
 from PyQt5.QtWidgets import (
     QApplication, QMainWindow, QWidget, QLabel, QPushButton, QSlider, QCheckBox,
     QSpinBox, QFrame, QVBoxLayout, QHBoxLayout, QTabWidget, QLineEdit, QSizePolicy,
@@ -31,6 +33,23 @@ from src.ui.custom.file.FileListWidget import FileListWidget
 from src.ui.custom.zone.ZoneListWidget import ZoneListWidget
 
 THEME = "dark"
+IMG = os.path.join(BASE, "res", "IMAGES")
+
+
+def _icon(name: str) -> QIcon:
+    return QIcon(os.path.join(IMG, name))
+
+
+def make_btn(text="", icon_name=None, obj=None, icon_px=26, min_h=44) -> QPushButton:
+    b = QPushButton(text)
+    if obj:
+        b.setObjectName(obj)
+    if icon_name:
+        b.setIcon(_icon(icon_name))
+        b.setIconSize(QSize(icon_px, icon_px))
+    b.setMinimumHeight(min_h)
+    return b
+
 
 SAMPLE_FILES = [
     FileItem(header="Объявление о пожаре", filename="fire.mp3",
@@ -68,18 +87,18 @@ def section_label(text: str) -> QLabel:
 
 def build_left() -> QWidget:
     w = QWidget()
-    w.setFixedWidth(300)
+    w.setFixedWidth(310)
     col = QVBoxLayout(w)
     col.setContentsMargins(0, 0, 0, 0)
-    col.setSpacing(14)
+    col.setSpacing(16)
 
-    # бренд
+    # бренд — настоящий логотип, без кислотного кружка
     brand = QHBoxLayout()
-    brand.setSpacing(10)
-    logo = QLabel("КБ")
-    logo.setFixedSize(44, 44)
-    logo.setAlignment(Qt.AlignCenter)
-    logo.setStyleSheet("background: #2979FE; border-radius: 22px; color: white; font-weight: 700; font-size: 16px;")
+    brand.setSpacing(12)
+    logo = QLabel()
+    pm = QPixmap(os.path.join(IMG, "logo (2).png"))
+    if not pm.isNull():
+        logo.setPixmap(pm.scaled(42, 42, Qt.KeepAspectRatio, Qt.SmoothTransformation))
     name = QLabel("Sound Guard")
     name.setObjectName("brandName")
     brand.addWidget(logo)
@@ -87,15 +106,14 @@ def build_left() -> QWidget:
     brand.addStretch()
     col.addLayout(brand)
 
-    # карточка воспроизведения
+    # карточка воспроизведения — единственный яркий акцент (главное действие)
     pc = card()
     pcl = QVBoxLayout(pc)
     pcl.setContentsMargins(16, 16, 16, 16)
     pcl.setSpacing(12)
     pcl.addWidget(section_label("Воспроизведение"))
-    play = QPushButton("▶  Проиграть")
-    play.setObjectName("primary")
-    stop = QPushButton("■  Остановить")
+    play = make_btn("  Проиграть", "cast-audio-custom (1).png", obj="primary", icon_px=30, min_h=54)
+    stop = make_btn("Остановить", min_h=46)
     pcl.addWidget(play)
     pcl.addWidget(stop)
 
@@ -118,7 +136,7 @@ def build_left() -> QWidget:
     spin = QSpinBox()
     spin.setRange(0, 99)
     spin.setValue(3)
-    spin.setFixedWidth(64)
+    spin.setFixedWidth(70)
     rep_row.addWidget(rep)
     rep_row.addStretch()
     rep_row.addWidget(QLabel("раз"))
@@ -126,21 +144,14 @@ def build_left() -> QWidget:
     pcl.addLayout(rep_row)
     col.addWidget(pc)
 
-    # карточка трансляции
+    # карточка трансляции — спокойные кнопки с иконками
     bc = card()
     bcl = QVBoxLayout(bc)
     bcl.setContentsMargins(16, 16, 16, 16)
     bcl.setSpacing(12)
-    head = QHBoxLayout()
-    head.addWidget(section_label("Трансляция"))
-    head.addStretch()
-    rec = QPushButton("🎙")
-    rec.setObjectName("record")
-    head.addWidget(rec)
-    bcl.addLayout(head)
-    talk = QPushButton("🔴  Говорить с микрофона")
-    stoptalk = QPushButton("Прекратить вещание")
-    stoptalk.setObjectName("ghost")
+    bcl.addWidget(section_label("Трансляция"))
+    talk = make_btn("  Говорить с микрофона", "broadcast-custom (1).png", icon_px=28, min_h=50)
+    stoptalk = make_btn("  Прекратить вещание", "broadcast-off-custom.png", obj="ghost", icon_px=26, min_h=46)
     bcl.addWidget(talk)
     bcl.addWidget(stoptalk)
     col.addWidget(bc)
@@ -161,15 +172,14 @@ def build_center() -> QWidget:
     ftl.setContentsMargins(14, 14, 14, 14)
     ftl.setSpacing(12)
 
-    # тулбар: поиск + сортировка
+    # тулбар: поиск + сортировка (без эмодзи)
     tb = QHBoxLayout()
     tb.setSpacing(8)
     search = QLineEdit()
-    search.setPlaceholderText("🔎  Поиск файла…")
-    sort_name = QPushButton("По имени  A↓")
-    sort_name.setObjectName("ghost")
-    sort_date = QPushButton("По дате  ⌄")
-    sort_date.setObjectName("ghost")
+    search.setPlaceholderText("Поиск файла…")
+    search.setMinimumHeight(40)
+    sort_name = make_btn(" По имени", "sort1.png", obj="ghost", icon_px=22, min_h=40)
+    sort_date = make_btn(" По дате", "sort1.png", obj="ghost", icon_px=22, min_h=40)
     tb.addWidget(search, 1)
     tb.addWidget(sort_name)
     tb.addWidget(sort_date)
@@ -181,13 +191,12 @@ def build_center() -> QWidget:
     file_list.update_file_list(SAMPLE_FILES, grid_size=1)
     ftl.addWidget(file_list, 1)
 
-    # кнопки добавления
+    # кнопки добавления — крупные иконки
     add = QHBoxLayout()
     add.setSpacing(8)
-    a1 = QPushButton("＋  Загрузить аудиофайл")
-    a1.setObjectName("primary")
-    a2 = QPushButton("🎙  Записать с микрофона")
-    a3 = QPushButton("🗣  Озвучить из текста")
+    a1 = make_btn("  Загрузить аудиофайл", "arrow-up.png", obj="primary", icon_px=24, min_h=50)
+    a2 = make_btn("  Записать с микрофона", "microphone.png", icon_px=26, min_h=50)
+    a3 = make_btn("  Озвучить из текста", "text-to-speech.png", icon_px=26, min_h=50)
     add.addWidget(a1)
     add.addWidget(a2)
     add.addWidget(a3)
@@ -210,20 +219,24 @@ def build_center() -> QWidget:
 
 def build_right() -> QWidget:
     w = QWidget()
-    w.setFixedWidth(340)
+    w.setFixedWidth(350)
     col = QVBoxLayout(w)
     col.setContentsMargins(0, 0, 0, 0)
     col.setSpacing(12)
 
     head = QHBoxLayout()
+    head.setSpacing(8)
     t = QLabel("Зоны-Устройства")
     t.setObjectName("panelTitle")
     head.addWidget(t)
     head.addStretch()
-    for txt, tip in (("⌕", "Авто-поиск"), ("＋", "Добавить"), ("⟳", "Обновить")):
-        b = QPushButton(txt)
-        b.setObjectName("iconbtn")
-        b.setToolTip(tip)
+    auto = make_btn("", "monitor-speaker.png", obj="iconbtn", icon_px=24, min_h=42)
+    auto.setToolTip("Авто-поиск устройств")
+    add_zone = make_btn("+", obj="iconbtn", min_h=42)
+    add_zone.setToolTip("Добавить зону")
+    refresh = make_btn("", "refresh.png", obj="iconbtn", icon_px=24, min_h=42)
+    refresh.setToolTip("Обновить связь с зонами")
+    for b in (auto, add_zone, refresh):
         head.addWidget(b)
     col.addLayout(head)
 

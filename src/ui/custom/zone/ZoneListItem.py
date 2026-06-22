@@ -92,12 +92,14 @@ class ZoneListItem(QWidget):
 
         # Кнопки управления
         self.delete_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}delete-forever-outline-custom.png"))
-        self.delete_zone_btn.setIconSize(QSize(28, 28))
+        self.delete_zone_btn.setIconSize(QSize(32, 32))
+        self.delete_zone_btn.setFixedSize(48, 42)
         self.delete_zone_btn.pressed.connect(self.delete_zone)
         self.delete_zone_btn.setStyleSheet(zone_item_btn())
 
         self.rename_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}rename.png"))
-        self.rename_zone_btn.setIconSize(QSize(28, 28))
+        self.rename_zone_btn.setIconSize(QSize(32, 32))
+        self.rename_zone_btn.setFixedSize(48, 42)
         self.rename_zone_btn.pressed.connect(self.rename_zone)
         self.rename_zone_btn.setStyleSheet(zone_item_btn())
 
@@ -145,7 +147,7 @@ class ZoneListItem(QWidget):
         self.center_layout.addWidget(self.zone_name_label)
         self.center_layout.addLayout(self.zone_info_layout)
         self.center_layout.addWidget(self.subzones_container)
-        self.center_layout.setSpacing(5)
+        self.center_layout.setSpacing(8)
 
         self.right_layout.addWidget(self.delete_zone_btn)
         self.right_layout.addWidget(self.rename_zone_btn)
@@ -154,7 +156,8 @@ class ZoneListItem(QWidget):
         self.zone_container.addLayout(self.left_layout, 1)
         self.zone_container.addLayout(self.center_layout, 12)
         self.zone_container.addLayout(self.right_layout, 1)
-        self.zone_container.setContentsMargins(5, 5, 5, 5)
+        self.zone_container.setContentsMargins(14, 12, 14, 12)
+        self.zone_container.setSpacing(12)
 
         self.setLayout(self.zone_container)
         self._refresh_accents()
@@ -163,15 +166,15 @@ class ZoneListItem(QWidget):
         """Акценты: цветной статус, приглушённый IP, акцентная грань у выбранной зоны."""
         t = tokens_for(_get_theme())
         if self.zone.is_playing:
-            color, text = t.accent, "▶ Играет"
+            color, text = t.accent, "Играет"
         elif self.zone.is_streaming:
-            color, text = t.accent, "🎙 Вещание"
+            color, text = t.accent, "Вещание"
         elif self.zone.is_sip_running:
-            color, text = t.accent, "📞 Звонок"
+            color, text = t.accent, "Звонок"
         elif self.zone.is_online:
-            color, text = t.online, "● Онлайн"
+            color, text = t.online, "Онлайн"
         else:
-            color, text = t.muted, "● Не в сети"
+            color, text = t.muted, "Не в сети"
         self.online_status_label.setText(text)
         self.online_status_label.setStyleSheet(f"color: {color}; font-weight: 600; background: transparent;")
         self.zone_ip_label.setStyleSheet(f"color: {t.muted}; background: transparent;")

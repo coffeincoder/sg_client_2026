@@ -17,17 +17,8 @@ class ZoneListWidget(QListWidget):
 
     def __init__(self, parent=None):
         super(ZoneListWidget, self).__init__(parent)
-        self.setSpacing(5)
-        self.setStyleSheet("""
-            QListWidget {
-                border: 1px solid #ccc;
-                border-radius: 5px;
-                padding: 3px;
-            }
-            QListWidget::item {
-                margin-bottom: 5px;
-            }
-        """)
+        self.setSpacing(12)
+        self.setStyleSheet("QListWidget { background: transparent; border: none; }")
 
     def add_zone(self, zone: Orange):
         item = QListWidgetItem()

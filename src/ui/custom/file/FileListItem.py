@@ -86,13 +86,13 @@ class FileListItem(QWidget):
         self.file_item_text_area.setMinimumHeight(40)
         self.file_item_text_area.setMaximumHeight(70)
 
-        self.duration_label = QLabel(f"⏱  {self.file_item.duration} сек")
+        self.duration_label = QLabel(f"{self.file_item.duration} сек")
         self.duration_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.duration_label.setStyleSheet(duration_label_style())
         self.duration_label.setWordWrap(False)
         self.duration_label.setFont(QFont("Arial", 10))
 
-        self.create_date_label = QLabel(f"📅  {self.file_item.create_date}")
+        self.create_date_label = QLabel(f"{self.file_item.create_date}")
         self.create_date_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
         self.create_date_label.setStyleSheet(create_date_label_style1())
         self.create_date_label.setWordWrap(False)
@@ -118,7 +118,7 @@ class FileListItem(QWidget):
             elif self.file_item.current_voice == "an":
                 current_voice = "женский нейтральный"
 
-            self.current_voice_label = QLabel(f"🗣  {current_voice}")
+            self.current_voice_label = QLabel(f"голос: {current_voice}")
             self.current_voice_label.setWordWrap(False)
             self.current_voice_label.setFont(QFont("Arial", 10))
             self.current_voice_label.setStyleSheet(voice_label_style())
