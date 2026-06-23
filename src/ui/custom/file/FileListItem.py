@@ -41,11 +41,8 @@ class FileListItem(QWidget):
         }}
         """)
 
-        if self.theme == "light":
-            self.menu_button.setIcon(QIcon(f"{paths.img_files}{sep}menu-custom-dark.png"))
-        elif self.theme == "dark":
-            self.menu_button.setIcon(QIcon(f"{paths.img_files}{sep}menu-custom.png"))
-        self.menu_button.setIconSize(QSize(32, 32))
+        self.menu_button.setIcon(QIcon(f"{paths.img_files}{sep}ic-gear.png"))
+        self.menu_button.setIconSize(QSize(26, 26))
         self.menu_button.setPopupMode(QToolButton.InstantPopup)
         self.menu_button.setFixedSize(40, 40)
 

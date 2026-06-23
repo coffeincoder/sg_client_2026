@@ -12,6 +12,7 @@ QSS-стиля для всего приложения. Применяется о
 общий стиль и `objectName`. Это и есть «единый вид» из редизайна.
 Имена цветов согласованы с src/ui/Colors.py (бренд-синий #2979FE сохранён).
 """
+import os
 from dataclasses import dataclass
 
 
@@ -57,6 +58,8 @@ def tokens_for(theme: str) -> Tokens:
 def app_stylesheet(theme: str = "dark") -> str:
     """Единый QSS для всего приложения, собранный из токенов выбранной темы."""
     t = tokens_for(theme)
+    # абсолютный путь к иконкам (для url() в QSS), прямые слэши для кросс-платформенности
+    img = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "res", "IMAGES")).replace(os.sep, "/")
     return f"""
 * {{ font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: {t.text}; }}
 QMainWindow, QWidget#root {{ background: {t.bg}; }}
@@ -86,6 +89,7 @@ QPushButton#record {{ background: {t.danger}; border: none; border-radius: 26px;
 QPushButton#record:hover {{ background: {t.danger_h}; }}
 QToolButton {{ background: transparent; border: 1px solid transparent; border-radius: 8px; padding: 4px; }}
 QToolButton:hover {{ border-color: {t.accent}; }}
+QToolButton::menu-indicator {{ image: none; }}
 
 /* вкладки */
 QTabWidget::pane {{ border: 1px solid {t.border}; border-radius: 10px; top: -1px; background: {t.card}; }}
@@ -102,11 +106,22 @@ QComboBox::drop-down {{ border: none; width: 22px; }}
 QComboBox QAbstractItemView {{ background: {t.elev}; border: 1px solid {t.border};
         selection-background-color: {t.accent}; outline: none; }}
 
+/* спинбокс — видимые кнопки +/- со стрелками */
+QSpinBox {{ padding-right: 22px; }}
+QSpinBox::up-button {{ subcontrol-origin: border; subcontrol-position: top right; width: 20px;
+        border-left: 1px solid {t.border}; border-top-right-radius: 8px; background: {t.elev}; }}
+QSpinBox::down-button {{ subcontrol-origin: border; subcontrol-position: bottom right; width: 20px;
+        border-left: 1px solid {t.border}; border-bottom-right-radius: 8px; background: {t.elev}; }}
+QSpinBox::up-button:hover, QSpinBox::down-button:hover {{ background: {t.border}; }}
+QSpinBox::up-button:pressed, QSpinBox::down-button:pressed {{ background: {t.accent}; }}
+QSpinBox::up-arrow {{ image: url({img}/ic-chevron-up.png); width: 12px; height: 12px; }}
+QSpinBox::down-arrow {{ image: url({img}/ic-chevron-down.png); width: 12px; height: 12px; }}
+
 /* чекбокс */
 QCheckBox {{ spacing: 8px; }}
 QCheckBox::indicator {{ width: 18px; height: 18px; border-radius: 5px;
         border: 1px solid {t.border}; background: {t.elev}; }}
-QCheckBox::indicator:checked {{ background: {t.accent}; border-color: {t.accent}; }}
+QCheckBox::indicator:checked {{ background: {t.accent}; border-color: {t.accent}; image: url({img}/ic-check.png); }}
 
 /* слайдер */
 QSlider::groove:horizontal {{ height: 6px; background: {t.elev}; border-radius: 3px; }}
