@@ -25,45 +25,14 @@ class FileListItem(QWidget):
         self.initUI()
 
     def initUI(self):
-        # Создайте рамку
-        self.file_item_container = QVBoxLayout()
-        self.setObjectName("fileCard")  # облик карточки — общий QSS (src/ui/theme.py)
+        self.setObjectName("fileCard")
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(file_list_item_style())
-
         self.menu_button = self._build_gear_button()
-
         self.header_text = self._build_header_label()
-
         self.file_item_text_area = self._build_text_area()
-
         self._build_meta_labels()
-
-        self.header_layout = QHBoxLayout()
-        self.header_layout.addWidget(self.header_text)
-        self.header_layout.addWidget(self.menu_button)
-
-        self.bottom_info_layout = QHBoxLayout()
-        self.bottom_info_layout.setSpacing(18)
-        self.bottom_info_layout.addWidget(self.duration_label)
-        self.bottom_info_layout.addWidget(self.create_date_label)
-
-        if self.file_item.current_voice is not None:
-            self.bottom_info_layout.addWidget(self.current_voice_label)
-
-        self.bottom_info_layout.addStretch()  # чипы компактные, прижаты влево
-
-        self.file_item_container.setContentsMargins(14, 12, 14, 12)
-        self.file_item_container.setSpacing(8)
-        self.file_item_container.addLayout(self.header_layout)
-        self.file_item_container.addWidget(self.file_item_text_area)
-        self.file_item_container.addLayout(self.bottom_info_layout)
-        self.setLayout(self.file_item_container)
-
-        # Установите цвет рамки
-        palette = QPalette()
-        palette.setColor(QPalette.Window, QColor('grey'))
-        self.setPalette(palette)
+        self._assemble_layouts()
 
     def _build_gear_button(self) -> QToolButton:
         btn = QToolButton(self)
@@ -152,6 +121,31 @@ class FileListItem(QWidget):
             self.create_date_label.setStyleSheet(create_date_label_style2())
         else:
             self.create_date_label.setStyleSheet(create_date_label_style1())
+
+    def _assemble_layouts(self) -> None:
+        header_layout = QHBoxLayout()
+        header_layout.addWidget(self.header_text)
+        header_layout.addWidget(self.menu_button)
+
+        bottom_info_layout = QHBoxLayout()
+        bottom_info_layout.setSpacing(18)
+        bottom_info_layout.addWidget(self.duration_label)
+        bottom_info_layout.addWidget(self.create_date_label)
+        if self.file_item.current_voice is not None:
+            bottom_info_layout.addWidget(self.current_voice_label)
+        bottom_info_layout.addStretch()
+
+        self.file_item_container = QVBoxLayout()
+        self.file_item_container.setContentsMargins(14, 12, 14, 12)
+        self.file_item_container.setSpacing(8)
+        self.file_item_container.addLayout(header_layout)
+        self.file_item_container.addWidget(self.file_item_text_area)
+        self.file_item_container.addLayout(bottom_info_layout)
+        self.setLayout(self.file_item_container)
+
+        palette = QPalette()
+        palette.setColor(QPalette.Window, QColor('grey'))
+        self.setPalette(palette)
 
     def set_selected(self, on: bool):
         """Подсветка карточки выбранного файла акцентной рамкой."""
