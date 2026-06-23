@@ -41,12 +41,6 @@ class ZoneListItem(QWidget):
         self.right_layout = QVBoxLayout()
         self.zone_container = QHBoxLayout()
 
-        # Чекбоксы для подзон с названиями из репозитория
-        self.subzone1_checkbox = QCheckBox(self.zone.subzone1_name or "Подзона 1")
-        self.subzone2_checkbox = QCheckBox(self.zone.subzone2_name or "Подзона 2")
-        self.subzones_layout = QVBoxLayout()
-        self.subzones_container = QWidget()
-
         self.initUI()
 
     def initUI(self):
@@ -58,6 +52,9 @@ class ZoneListItem(QWidget):
         self.zone_name_label = self._build_name_label()
 
         self._build_ip_status_labels()
+
+        # Настройка чекбоксов подзон с названиями из репозитория
+        self.subzones_container = self._build_subzones()
 
         # Главный чекбокс зоны
         self.checkbox.setChecked(self.zone.isChecked)
@@ -75,39 +72,6 @@ class ZoneListItem(QWidget):
         # Меню действий (шестерёнка): переименование и удаление спрятаны,
         # чтобы зону нельзя было снести случайным кликом.
         self.menu_button = self._build_gear_button()
-
-        # Настройка чекбоксов подзон с названиями из репозитория
-        subzone_style = """
-            QCheckBox {
-                font-size: 11px;
-                padding: 4px;
-                spacing: 6px;
-            }
-            QCheckBox::indicator {
-                width: 16px;
-                height: 16px;
-            }
-        """
-
-        self.subzone1_checkbox.setStyleSheet(subzone_style)
-        self.subzone2_checkbox.setStyleSheet(subzone_style)
-        self.subzone1_checkbox.setChecked(self.zone.subzone1)
-        self.subzone2_checkbox.setChecked(self.zone.subzone2)
-        self.subzone1_checkbox.setEnabled(self.zone.isChecked)
-        self.subzone2_checkbox.setEnabled(self.zone.isChecked)
-
-        self.subzone1_checkbox.stateChanged.connect(self.update_subzone1_state)
-        self.subzone2_checkbox.stateChanged.connect(self.update_subzone2_state)
-
-        # Вертикальное расположение подзон
-        self.subzones_layout.addWidget(self.subzone1_checkbox)
-        self.subzones_layout.addWidget(self.subzone2_checkbox)
-        self.subzones_layout.addStretch()
-        self.subzones_layout.setSpacing(5)
-        self.subzones_layout.setContentsMargins(10, 5, 5, 5)
-
-        self.subzones_container.setLayout(self.subzones_layout)
-        self.subzones_container.setStyleSheet("background: transparent;")
 
         # Компоновка элементов
         self.zone_info_layout.addWidget(self.zone_ip_label)
@@ -177,6 +141,43 @@ class ZoneListItem(QWidget):
         zone_menu.addAction(delete_action)
         btn.setMenu(zone_menu)
         return btn
+
+    def _build_subzones(self) -> QWidget:
+        subzone_style = """
+            QCheckBox {
+                font-size: 11px;
+                padding: 4px;
+                spacing: 6px;
+            }
+            QCheckBox::indicator {
+                width: 16px;
+                height: 16px;
+            }
+        """
+        self.subzone1_checkbox = QCheckBox(self.zone.subzone1_name or "Подзона 1")
+        self.subzone2_checkbox = QCheckBox(self.zone.subzone2_name or "Подзона 2")
+
+        self.subzone1_checkbox.setStyleSheet(subzone_style)
+        self.subzone2_checkbox.setStyleSheet(subzone_style)
+        self.subzone1_checkbox.setChecked(self.zone.subzone1)
+        self.subzone2_checkbox.setChecked(self.zone.subzone2)
+        self.subzone1_checkbox.setEnabled(self.zone.isChecked)
+        self.subzone2_checkbox.setEnabled(self.zone.isChecked)
+
+        self.subzone1_checkbox.stateChanged.connect(self.update_subzone1_state)
+        self.subzone2_checkbox.stateChanged.connect(self.update_subzone2_state)
+
+        layout = QVBoxLayout()
+        layout.addWidget(self.subzone1_checkbox)
+        layout.addWidget(self.subzone2_checkbox)
+        layout.addStretch()
+        layout.setSpacing(5)
+        layout.setContentsMargins(10, 5, 5, 5)
+
+        container = QWidget()
+        container.setLayout(layout)
+        container.setStyleSheet("background: transparent;")
+        return container
 
     def _refresh_accents(self):
         """Акценты: цветной статус, приглушённый IP, акцентная грань у выбранной зоны."""
