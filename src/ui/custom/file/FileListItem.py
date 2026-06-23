@@ -31,46 +31,7 @@ class FileListItem(QWidget):
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(file_list_item_style())
 
-        self.menu_button = QToolButton(self)
-        self.menu_button.setStyleSheet(f"""
-        QToolButton {{
-            border-radius: 8px;
-        }}
-        QToolButton:hover{{
-            border: 1px solid #2979FE;
-            border-radius: 8px;
-            background-color: transparent;
-        }}
-        """)
-
-        self.menu_button.setIcon(QIcon(f"{paths.img_files}{sep}ic-gear.png"))
-        self.menu_button.setIconSize(QSize(26, 26))
-        self.menu_button.setPopupMode(QToolButton.InstantPopup)
-        self.menu_button.setFocusPolicy(Qt.NoFocus)
-        self.menu_button.setFixedSize(40, 40)
-
-        # Создание действий для меню
-        rename_action = QAction('Переименовать', self)
-        delete_action = QAction('Удалить', self)
-        listen_action = QAction('Прослушать', self)
-        add_description = QAction('Редактировать описание', self)
-
-        # Подключение слотов к действиям
-        rename_action.triggered.connect(self.rename_file)
-        listen_action.triggered.connect(self.listen_file)
-        delete_action.triggered.connect(self.delete_file)
-        add_description.triggered.connect(self.add_description)
-
-        # Создание меню и добавление действий
-        menu = QMenu(self)
-        menu.addAction(rename_action)
-        menu.addAction(listen_action)
-        menu.addAction(add_description)
-        menu.addAction(delete_action)
-
-
-        # Установка меню для кнопки
-        self.menu_button.setMenu(menu)
+        self.menu_button = self._build_gear_button()
 
         self.header_text = QLabel(self.file_item.header.replace('\n', ' ').replace("_", " "))
         self.header_text.setFont(QFont("Arial", 12))
@@ -140,6 +101,48 @@ class FileListItem(QWidget):
         palette = QPalette()
         palette.setColor(QPalette.Window, QColor('grey'))
         self.setPalette(palette)
+
+    def _build_gear_button(self) -> QToolButton:
+        btn = QToolButton(self)
+        btn.setStyleSheet("""
+        QToolButton {
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background-color: transparent;
+        }
+        QToolButton:hover {
+            border: 1px solid #2979FE;
+            background-color: transparent;
+        }
+        QToolButton:pressed, QToolButton:open {
+            border: 1px solid transparent;
+            background-color: transparent;
+        }
+        """)
+        btn.setIcon(QIcon(f"{paths.img_files}{sep}ic-gear.png"))
+        btn.setIconSize(QSize(26, 26))
+        btn.setPopupMode(QToolButton.InstantPopup)
+        btn.setFocusPolicy(Qt.NoFocus)
+        btn.setAutoRaise(True)
+        btn.setFixedSize(40, 40)
+
+        rename_action = QAction('Переименовать', self)
+        delete_action = QAction('Удалить', self)
+        listen_action = QAction('Прослушать', self)
+        add_description_action = QAction('Редактировать описание', self)
+
+        rename_action.triggered.connect(self.rename_file)
+        listen_action.triggered.connect(self.listen_file)
+        delete_action.triggered.connect(self.delete_file)
+        add_description_action.triggered.connect(self.add_description)
+
+        menu = QMenu(self)
+        menu.addAction(rename_action)
+        menu.addAction(listen_action)
+        menu.addAction(add_description_action)
+        menu.addAction(delete_action)
+        btn.setMenu(menu)
+        return btn
 
     def set_selected(self, on: bool):
         """Подсветка карточки выбранного файла акцентной рамкой."""
