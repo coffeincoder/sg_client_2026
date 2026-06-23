@@ -35,11 +35,7 @@ class FileListItem(QWidget):
 
         self.header_text = self._build_header_label()
 
-        self.file_item_text_area = ScrollLabel(self)
-        self.file_item_text_area.setText(self.file_item.text)
-        self.file_item_text_area.setObjectName("text_text")
-        self.file_item_text_area.setMinimumHeight(40)
-        self.file_item_text_area.setMaximumHeight(70)
+        self.file_item_text_area = self._build_text_area()
 
         self.duration_label = QLabel(f"{self.file_item.duration} сек")
         self.duration_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
@@ -147,6 +143,14 @@ class FileListItem(QWidget):
         label.setObjectName("header")
         label.setStyleSheet(list_widget_header_style())
         return label
+
+    def _build_text_area(self) -> ScrollLabel:
+        area = ScrollLabel(self)
+        area.setText(self.file_item.text)
+        area.setObjectName("text_text")
+        area.setMinimumHeight(40)
+        area.setMaximumHeight(70)
+        return area
 
     def set_selected(self, on: bool):
         """Подсветка карточки выбранного файла акцентной рамкой."""
