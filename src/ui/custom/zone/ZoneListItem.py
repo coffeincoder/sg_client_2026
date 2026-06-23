@@ -58,11 +58,7 @@ class ZoneListItem(QWidget):
         self.setStyleSheet(zone_list_item_style())
 
         # Настройка основных элементов
-        self.zone_name_label.setFont(QFont("Arial", 10, QFont.Bold))
-        self.zone_name_label.setAlignment(Qt.AlignLeft)
-        self.zone_name_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.zone_name_label.setWordWrap(True)
-        self.zone_name_label.setStyleSheet(list_widget_header_style())
+        self.zone_name_label = self._build_name_label()
 
         self.zone_ip_label.setFont(QFont("Arial", 9))
         self.zone_ip_label.setAlignment(Qt.AlignLeft)
@@ -150,6 +146,15 @@ class ZoneListItem(QWidget):
 
         self.setLayout(self.zone_container)
         self._refresh_accents()
+
+    def _build_name_label(self) -> QLabel:
+        label = QLabel(self.zone.name)
+        label.setFont(QFont("Arial", 10, QFont.Bold))
+        label.setAlignment(Qt.AlignLeft)
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        label.setWordWrap(True)
+        label.setStyleSheet(list_widget_header_style())
+        return label
 
     def _build_gear_button(self) -> QToolButton:
         btn = QToolButton()
