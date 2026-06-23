@@ -61,10 +61,8 @@ class Ui_MainWindow(object):
     sort_by_name_btn: QPushButton
     upload_custom_file_btn: QPushButton
     zone_list_container: QVBoxLayout
-    list_top_controls_layout: QHBoxLayout
     file_list_widget: FileListWidget
     add_file_buttons_layout: QHBoxLayout
-    filelist_container_layout: QVBoxLayout
     zone_list_label: QLabel
     zone_list_widget: ZoneListWidget
     play_local_btn: QPushButton
@@ -127,81 +125,8 @@ class Ui_MainWindow(object):
         self.left_vertical_layout.addWidget(self.broadcast_gb, 1)
 
         #                                                ------------------------------------------>left_vertical_layout
-        # виджет со списком файлов
-        self.file_list_widget = FileListWidget(self.central_widget)
-
         #                                              center_vertical_layout>------------------------------------------
-        # контейнер со списком файлов и кнопками управления списка
-        self.filelist_container_layout = QtWidgets.QVBoxLayout()
-        # контейнер с элементами управления списком
-        self.list_top_controls_layout = QtWidgets.QHBoxLayout()
-
-        # контейнер слайдера для установки масштаба отображения списка
-        self.list_scale_controls_layout = QHBoxLayout()
-        self.list_scale_controls_layout.setContentsMargins(0, 0, 0, 0)
-
-        # надпись над слайдером
-        text_field = QLabel('масштаб')
-        text_field.setFixedHeight(20)
-
-        # сам слайдер для установки масштаба отображения списка
-        self.list_scale_slider = QtWidgets.QSlider(Qt.Horizontal)
-        self.list_scale_slider.setMinimum(1)
-        self.list_scale_slider.setMaximum(4)
-        self.list_scale_slider.setFixedHeight(25)
-        self.list_scale_slider.setFixedWidth(50)
-
-        # кнопки сортировки списка
-        self.sort_by_name_btn = QtWidgets.QPushButton("А-Я")
-        self.sort_by_date_btn = QtWidgets.QPushButton('дд.мм')
-        # Добавляем layout управления масштабом в основной layout управления списком
-        self.list_top_controls_layout.addLayout(self.list_scale_controls_layout)
-
-        # кнопки сортировки списка
-        self.sort_by_name_btn = QtWidgets.QPushButton("А-Я")
-        self.sort_by_date_btn = QtWidgets.QPushButton('дд.мм')
-        # Добавляем элементы в layout управления масштабом
-        self.list_scale_controls_layout.addWidget(text_field)
-        self.list_scale_controls_layout.addWidget(self.list_scale_slider)
-        self.list_scale_controls_layout.addStretch()  # Добавляем растягивающийся элемент
-
-        # Добавляем кнопки сортировки в layout
-        self.list_top_controls_layout.addWidget(self.sort_by_name_btn)
-        self.list_top_controls_layout.addWidget(self.sort_by_date_btn)
-        # Создаем QTabWidget для отображения вкладок
-        self.filelist_tab_widget = QtWidgets.QTabWidget(self.central_widget)
-
-        # Создаем виджет для вкладки со списком файлов
-        self.current_files_tab = QWidget()
-
-        # Устанавливаем layout для вкладки
-        self.current_files_layout = QVBoxLayout(self.current_files_tab)
-
-        # Убираем отступы и spacing
-        self.current_files_layout.setContentsMargins(0, 0, 0, 0)
-        self.current_files_layout.setSpacing(0)
-
-        # Добавляем элементы управления и сам список файлов в layout вкладки
-        self.current_files_layout.addLayout(self.list_top_controls_layout, 0)
-        self.current_files_layout.addWidget(self.file_list_widget, 1)
-
-        # Устанавливаем layout на вкладку
-        self.current_files_tab.setLayout(self.current_files_layout)
-
-        # Добавляем вкладку в QTabWidget
-        self.filelist_tab_widget.addTab(self.current_files_tab, "Файлы")
-        #
-        # Создаем виджет для вкладки "сценарии"
-        self.scenarios_tab = QWidget()
-        self.scenarios_tab.setMaximumWidth(900)
-        # Устанавливаем layout для вкладки
-        self.scenarios_layout = QVBoxLayout(self.scenarios_tab)
-
-        # Устанавливаем layout на вкладку
-        self.scenarios_tab.setLayout(self.scenarios_layout)
-
-        # Добавляем вкладку "сценарии" в QTabWidget
-        self.filelist_tab_widget.addTab(self.scenarios_tab, "сценарии")
+        self.filelist_tab_widget = self._build_file_list_panel()
 
         # Добавляем QTabWidget в основной контейнер
         self.filelist_container_layout.addWidget(self.filelist_tab_widget, 4)
@@ -288,8 +213,6 @@ class Ui_MainWindow(object):
 
         # Устанавливаем stacked_layout в качестве основного layout для add_file_gb
         self.add_file_gb.setLayout(self.stacked_widget.layout())
-        self.current_files_layout.setSpacing(0)  # Убираем отступы между элементами
-        self.current_files_layout.setContentsMargins(0, 0, 0, 0)  # Убираем внешние отступы
         # Функция для обновления стиля кнопок
         def update_button_styles(active_button):
             if active_button == 'text':
@@ -456,6 +379,50 @@ class Ui_MainWindow(object):
         layout.addWidget(self.realtime_button, 1)
         layout.addWidget(self.stop_realtime_button, 1)
         return gb
+
+    def _build_file_list_panel(self) -> QTabWidget:
+        self.file_list_widget = FileListWidget(self.central_widget)
+        self.file_list_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+
+        self.list_scale_slider = QtWidgets.QSlider(Qt.Horizontal)
+        self.list_scale_slider.setMinimum(1)
+        self.list_scale_slider.setMaximum(4)
+        self.list_scale_slider.setFixedHeight(25)
+        self.list_scale_slider.setFixedWidth(50)
+
+        text_field = QLabel('масштаб')
+        text_field.setFixedHeight(20)
+
+        self.list_scale_controls_layout = QHBoxLayout()
+        self.list_scale_controls_layout.setContentsMargins(0, 0, 0, 0)
+        self.list_scale_controls_layout.addWidget(text_field)
+        self.list_scale_controls_layout.addWidget(self.list_scale_slider)
+        self.list_scale_controls_layout.addStretch()
+
+        self.sort_by_name_btn = QtWidgets.QPushButton("А-Я")
+        self.sort_by_date_btn = QtWidgets.QPushButton('дд.мм')
+
+        list_top_controls_layout = QtWidgets.QHBoxLayout()
+        list_top_controls_layout.addLayout(self.list_scale_controls_layout)
+        list_top_controls_layout.addWidget(self.sort_by_name_btn)
+        list_top_controls_layout.addWidget(self.sort_by_date_btn)
+
+        self.current_files_tab = QWidget()
+        self.current_files_tab.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        current_files_layout = QVBoxLayout(self.current_files_tab)
+        current_files_layout.setContentsMargins(0, 0, 0, 0)
+        current_files_layout.setSpacing(0)
+        current_files_layout.addLayout(list_top_controls_layout, 0)
+        current_files_layout.addWidget(self.file_list_widget, 1)
+
+        self.scenarios_tab = QWidget()
+        self.scenarios_tab.setMaximumWidth(900)
+        self.scenarios_layout = QVBoxLayout(self.scenarios_tab)
+
+        tab_widget = QtWidgets.QTabWidget(self.central_widget)
+        tab_widget.addTab(self.current_files_tab, "Файлы")
+        tab_widget.addTab(self.scenarios_tab, "сценарии")
+        return tab_widget
 
     def set_volume(self):
         logger.info(self.volume_slider.value())
