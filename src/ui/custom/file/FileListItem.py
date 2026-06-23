@@ -37,17 +37,7 @@ class FileListItem(QWidget):
 
         self.file_item_text_area = self._build_text_area()
 
-        self.duration_label = QLabel(f"{self.file_item.duration} сек")
-        self.duration_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
-        self.duration_label.setStyleSheet(duration_label_style())
-        self.duration_label.setWordWrap(False)
-        self.duration_label.setFont(QFont("Arial", 10))
-
-        self.create_date_label = QLabel(f"{self.file_item.create_date}")
-        self.create_date_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
-        self.create_date_label.setStyleSheet(create_date_label_style1())
-        self.create_date_label.setWordWrap(False)
-        self.create_date_label.setFont(QFont("Arial", 10))
+        self._build_meta_labels()
 
         self.header_layout = QHBoxLayout()
         self.header_layout.addWidget(self.header_text)
@@ -59,23 +49,6 @@ class FileListItem(QWidget):
         self.bottom_info_layout.addWidget(self.create_date_label)
 
         if self.file_item.current_voice is not None:
-            current_voice = ""
-            if self.file_item.current_voice == "fg":
-                current_voice = "мужской доброжелательный"
-            elif self.file_item.current_voice == "fn":
-                current_voice = "мужской нейтральный"
-            elif self.file_item.current_voice == "ag":
-                current_voice = "женский доброжелательный"
-            elif self.file_item.current_voice == "an":
-                current_voice = "женский нейтральный"
-
-            self.current_voice_label = QLabel(f"голос: {current_voice}")
-            self.current_voice_label.setWordWrap(False)
-            self.current_voice_label.setFont(QFont("Arial", 10))
-            self.current_voice_label.setStyleSheet(voice_label_style())
-
-            self.create_date_label.setStyleSheet(create_date_label_style2())
-
             self.bottom_info_layout.addWidget(self.current_voice_label)
 
         self.bottom_info_layout.addStretch()  # чипы компактные, прижаты влево
@@ -151,6 +124,34 @@ class FileListItem(QWidget):
         area.setMinimumHeight(40)
         area.setMaximumHeight(70)
         return area
+
+    def _build_meta_labels(self) -> None:
+        self.duration_label = QLabel(f"{self.file_item.duration} сек")
+        self.duration_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        self.duration_label.setStyleSheet(duration_label_style())
+        self.duration_label.setWordWrap(False)
+        self.duration_label.setFont(QFont("Arial", 10))
+
+        self.create_date_label = QLabel(f"{self.file_item.create_date}")
+        self.create_date_label.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        self.create_date_label.setWordWrap(False)
+        self.create_date_label.setFont(QFont("Arial", 10))
+
+        if self.file_item.current_voice is not None:
+            voice_map = {
+                "fg": "мужской доброжелательный",
+                "fn": "мужской нейтральный",
+                "ag": "женский доброжелательный",
+                "an": "женский нейтральный",
+            }
+            current_voice = voice_map.get(self.file_item.current_voice, "")
+            self.current_voice_label = QLabel(f"голос: {current_voice}")
+            self.current_voice_label.setWordWrap(False)
+            self.current_voice_label.setFont(QFont("Arial", 10))
+            self.current_voice_label.setStyleSheet(voice_label_style())
+            self.create_date_label.setStyleSheet(create_date_label_style2())
+        else:
+            self.create_date_label.setStyleSheet(create_date_label_style1())
 
     def set_selected(self, on: bool):
         """Подсветка карточки выбранного файла акцентной рамкой."""
