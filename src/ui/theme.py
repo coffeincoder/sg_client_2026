@@ -130,9 +130,13 @@ QSlider::handle:horizontal {{ background: white; width: 16px; height: 16px;
         margin: -6px 0; border-radius: 8px; }}
 
 /* список файлов (QTableWidget) и список зон (QListWidget) — без рамок, прозрачный фон */
-QTableWidget, QListWidget {{ background: transparent; border: none; gridline-color: transparent; }}
+QTableWidget, QListWidget {{ background: transparent; border: none; gridline-color: transparent;
+        selection-background-color: transparent; outline: none; }}
 QTableWidget::item {{ background: transparent; padding: 0; }}
 QListWidget::item {{ background: transparent; }}
+/* убираем дефолтную квадратную подсветку выделения — она торчала острыми углами
+   за скруглёнными карточками; выделение показываем своей акцентной рамкой на карточке */
+QTableWidget::item:selected, QListWidget::item:selected {{ background: transparent; color: {t.text}; }}
 QWidget#fileCard, QWidget#zoneCard {{ background: {t.card}; border: 1px solid {t.border}; border-radius: 12px; }}
 QWidget#fileCard:hover, QWidget#zoneCard:hover {{ border-color: {t.accent}; }}
 

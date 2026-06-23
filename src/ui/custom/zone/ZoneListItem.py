@@ -94,6 +94,7 @@ class ZoneListItem(QWidget):
         self.menu_button.setIconSize(QSize(22, 22))
         self.menu_button.setFixedSize(44, 40)
         self.menu_button.setPopupMode(QToolButton.InstantPopup)
+        self.menu_button.setFocusPolicy(Qt.NoFocus)
         self.menu_button.setStyleSheet(zone_item_btn())
 
         zone_menu = QMenu(self)

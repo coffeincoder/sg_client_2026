@@ -46,6 +46,7 @@ class FileListItem(QWidget):
         self.menu_button.setIcon(QIcon(f"{paths.img_files}{sep}ic-gear.png"))
         self.menu_button.setIconSize(QSize(26, 26))
         self.menu_button.setPopupMode(QToolButton.InstantPopup)
+        self.menu_button.setFocusPolicy(Qt.NoFocus)
         self.menu_button.setFixedSize(40, 40)
 
         # Создание действий для меню
