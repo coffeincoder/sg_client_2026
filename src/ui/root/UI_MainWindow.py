@@ -95,72 +95,20 @@ class Ui_MainWindow(object):
 
         self.central_widget = QtWidgets.QWidget(MainWindow)
         self.central_widget.setObjectName("centralwidget")
-
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-        main_vertical_layout = QVBoxLayout(self.central_widget)
-        main_horizontal_layout = QHBoxLayout(self.central_widget)
-
-        self.left_vertical_layout = QtWidgets.QVBoxLayout()
-        self.center_vertical_layout = QtWidgets.QVBoxLayout()
-        self.right_vertical_layout = QtWidgets.QVBoxLayout()
-
-        #                                               left_vertical_layout >------------------------------------------
-        # ksb Label "иконка ксб"
         self.KSB_label_layout = QHBoxLayout(self.central_widget)
-        self.KSB_label = QtWidgets.QLabel()
         self.KSB_label = QtWidgets.QLabel()
         self.KSB_label_layout.addWidget(self.KSB_label, 1)
 
-        # Групбокс контейнер воспроизведения
         self.playback_gb = self._build_playback_panel()
-
-        # Группбокс "Трансляция"
         self.broadcast_gb = self._build_broadcast_panel()
-
-        self.left_vertical_layout.addLayout(self.KSB_label_layout, 1)
-        self.left_vertical_layout.addWidget(self.playback_gb, 5)
-        self.left_vertical_layout.addWidget(self.broadcast_gb, 1)
-
-        #                                                ------------------------------------------>left_vertical_layout
-        #                                              center_vertical_layout>------------------------------------------
-        self.filelist_container_layout = QtWidgets.QVBoxLayout()
         self.filelist_tab_widget = self._build_file_list_panel()
-
-        # Добавляем QTabWidget в основной контейнер
-        self.filelist_container_layout.addWidget(self.filelist_tab_widget, 4)
-
-        # Устанавливаем политику размера для содержимого вкладки
-        self.current_files_tab.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.file_list_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-
         self.add_file_gb = self._build_add_file_panel()
-
-        self.center_vertical_layout.addLayout(self.filelist_container_layout)
-        self.center_vertical_layout.addWidget(self.add_file_gb)
-        #                                              ------------------------------------------>center_vertical_layout
-
-        #                                               right_vertical_layout>------------------------------------------
         self.zone_list_container = self._build_zone_panel()
-
-        self.right_vertical_layout.addLayout(self.zone_list_container, 15)
-
-        #                                               ------------------------------------------>right_vertical_layout
-
-        main_horizontal_layout.addLayout(self.left_vertical_layout, 2)
-        main_horizontal_layout.addLayout(self.center_vertical_layout, 10)
-        main_horizontal_layout.addLayout(self.right_vertical_layout, 3)
-
-        # Progress Bar для отображения прогресса загрузки
-        self.progressBar = QtWidgets.QProgressBar(self.central_widget)
-
-        main_vertical_layout.addLayout(main_horizontal_layout)
-        main_vertical_layout.addWidget(self.progressBar)
-
-        MainWindow.setCentralWidget(self.central_widget)
-        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+        self._assemble_main_layout(MainWindow)
 
         self.retranslate_ui(MainWindow)
 
@@ -383,6 +331,37 @@ class Ui_MainWindow(object):
         layout.addWidget(self.zone_process_indicator)
         layout.addWidget(self.zone_list_widget)
         return layout
+
+    def _assemble_main_layout(self, MainWindow) -> None:
+        self.left_vertical_layout = QtWidgets.QVBoxLayout()
+        self.left_vertical_layout.addLayout(self.KSB_label_layout, 1)
+        self.left_vertical_layout.addWidget(self.playback_gb, 5)
+        self.left_vertical_layout.addWidget(self.broadcast_gb, 1)
+
+        filelist_container_layout = QtWidgets.QVBoxLayout()
+        filelist_container_layout.addWidget(self.filelist_tab_widget, 4)
+        filelist_container_layout.addWidget(self.add_file_gb)
+
+        self.center_vertical_layout = QtWidgets.QVBoxLayout()
+        self.center_vertical_layout.addLayout(filelist_container_layout)
+
+        self.right_vertical_layout = QtWidgets.QVBoxLayout()
+        self.right_vertical_layout.addLayout(self.zone_list_container, 15)
+
+        main_horizontal_layout = QHBoxLayout(self.central_widget)
+        main_horizontal_layout.addLayout(self.left_vertical_layout, 2)
+        main_horizontal_layout.addLayout(self.center_vertical_layout, 10)
+        main_horizontal_layout.addLayout(self.right_vertical_layout, 3)
+
+        self.progressBar = QtWidgets.QProgressBar(self.central_widget)
+        self.progressBar.setMaximumHeight(25)
+
+        main_vertical_layout = QVBoxLayout(self.central_widget)
+        main_vertical_layout.addLayout(main_horizontal_layout)
+        main_vertical_layout.addWidget(self.progressBar)
+
+        MainWindow.setCentralWidget(self.central_widget)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def set_volume(self):
         logger.info(self.volume_slider.value())
