@@ -143,36 +143,7 @@ class Ui_MainWindow(object):
         #                                              ------------------------------------------>center_vertical_layout
 
         #                                               right_vertical_layout>------------------------------------------
-        # контейнер для списка зон и кнопками управления этим списком
-        self.zone_list_container = QtWidgets.QVBoxLayout()
-
-        # надпись над списком зон
-        self.zone_list_label = QtWidgets.QLabel()
-
-        # контейнер для кнопок над списком зон
-        self.zone_buttons_layout = QtWidgets.QHBoxLayout()
-
-        # кнопка авто поиска зон над списком
-        self.auto_search_zones_btn = QtWidgets.QPushButton()
-        # кнопка добавления зоны над списком
-        self.zone_add_btn = QtWidgets.QPushButton()
-        # кнопка обновления зон над списком
-        self.zone_refresh_btn = QtWidgets.QPushButton()
-
-        # индикатор загрузки зон под кнопками управления
-        self.zone_process_indicator = IndicatorProgressBar(self.central_widget)
-
-        # виджет списка зон
-        self.zone_list_widget = ZoneListWidget(self.central_widget)
-
-        self.zone_buttons_layout.addWidget(self.auto_search_zones_btn)
-        self.zone_buttons_layout.addWidget(self.zone_add_btn)
-        self.zone_buttons_layout.addWidget(self.zone_refresh_btn)
-
-        self.zone_list_container.addWidget(self.zone_list_label)
-        self.zone_list_container.addLayout(self.zone_buttons_layout)
-        self.zone_list_container.addWidget(self.zone_process_indicator)
-        self.zone_list_container.addWidget(self.zone_list_widget)
+        self.zone_list_container = self._build_zone_panel()
 
         self.right_vertical_layout.addLayout(self.zone_list_container, 15)
 
@@ -390,6 +361,28 @@ class Ui_MainWindow(object):
         self.add_file_from_text_btn.clicked.connect(show_text_to_file_layout)
         self.add_file_from_mic_record_btn.clicked.connect(show_mic_record_layout)
         return gb
+
+    def _build_zone_panel(self) -> QVBoxLayout:
+        self.zone_list_label = QtWidgets.QLabel()
+
+        self.auto_search_zones_btn = QtWidgets.QPushButton()
+        self.zone_add_btn = QtWidgets.QPushButton()
+        self.zone_refresh_btn = QtWidgets.QPushButton()
+
+        self.zone_buttons_layout = QtWidgets.QHBoxLayout()
+        self.zone_buttons_layout.addWidget(self.auto_search_zones_btn)
+        self.zone_buttons_layout.addWidget(self.zone_add_btn)
+        self.zone_buttons_layout.addWidget(self.zone_refresh_btn)
+
+        self.zone_process_indicator = IndicatorProgressBar(self.central_widget)
+        self.zone_list_widget = ZoneListWidget(self.central_widget)
+
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.zone_list_label)
+        layout.addLayout(self.zone_buttons_layout)
+        layout.addWidget(self.zone_process_indicator)
+        layout.addWidget(self.zone_list_widget)
+        return layout
 
     def set_volume(self):
         logger.info(self.volume_slider.value())
