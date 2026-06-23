@@ -119,16 +119,8 @@ class Ui_MainWindow(object):
         # Групбокс контейнер воспроизведения
         self.playback_gb = self._build_playback_panel()
 
-        # кнопка начать трансляцию
-        self.realtime_button = QtWidgets.QPushButton()
-        # кнопка начать трансляцию
-        self.stop_realtime_button = QtWidgets.QPushButton()
-
         # Группбокс "Трансляция"
-        self.broadcast_gb = QtWidgets.QGroupBox("Трансляция")
-        self.broadcast_layout = QtWidgets.QVBoxLayout(self.broadcast_gb)
-        self.broadcast_layout.addWidget(self.realtime_button, 1)
-        self.broadcast_layout.addWidget(self.stop_realtime_button, 1)
+        self.broadcast_gb = self._build_broadcast_panel()
 
         self.left_vertical_layout.addLayout(self.KSB_label_layout, 1)
         self.left_vertical_layout.addWidget(self.playback_gb, 5)
@@ -453,6 +445,16 @@ class Ui_MainWindow(object):
         layout.addLayout(volume_slider_layout, 2)
         layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
         layout.addLayout(repeat_plus_now_playing_layout, 3)
+        return gb
+
+    def _build_broadcast_panel(self) -> QGroupBox:
+        self.realtime_button = QtWidgets.QPushButton()
+        self.stop_realtime_button = QtWidgets.QPushButton()
+
+        gb = QtWidgets.QGroupBox("Трансляция")
+        layout = QtWidgets.QVBoxLayout(gb)
+        layout.addWidget(self.realtime_button, 1)
+        layout.addWidget(self.stop_realtime_button, 1)
         return gb
 
     def set_volume(self):
