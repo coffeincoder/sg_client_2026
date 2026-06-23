@@ -31,11 +31,8 @@ class ZoneListItem(QWidget):
 
         self.setMinimumHeight(140)
 
-        self.status_indicator = QLabel()
         self.checkbox = QCheckBox()
         self.checkbox.stateChanged.connect(self.change_checked_state)
-        self.online_status_label = QLabel("Онлайн" if self.zone.is_online else "Не в сети")
-        self.zone_ip_label = QLabel(self.zone.ip)
         self.zone_info_layout = QHBoxLayout()
         self.zone_name_layout = QHBoxLayout()
         self.zone_name_label = QLabel(self.zone.name)
@@ -60,17 +57,13 @@ class ZoneListItem(QWidget):
         # Настройка основных элементов
         self.zone_name_label = self._build_name_label()
 
-        self.zone_ip_label.setFont(QFont("Arial", 9))
-        self.zone_ip_label.setAlignment(Qt.AlignLeft)
-
-        self.online_status_label.setFont(QFont("Arial", 9))
-        self.online_status_label.setAlignment(Qt.AlignRight)
+        self._build_ip_status_labels()
 
         # Главный чекбокс зоны
         self.checkbox.setChecked(self.zone.isChecked)
         self.checkbox.setStyleSheet("""
-            QCheckBox::indicator { 
-                width: 24px; 
+            QCheckBox::indicator {
+                width: 24px;
                 height: 24px;
             }
             QCheckBox {
@@ -78,11 +71,6 @@ class ZoneListItem(QWidget):
                 spacing: 5px;
             }
         """)
-
-        # Индикатор статуса
-        self.status_indicator.setAlignment(Qt.AlignCenter)
-        self.status_indicator.setStyleSheet("QLabel { padding: 2px; }")
-        self.update_status_indicator()
 
         # Меню действий (шестерёнка): переименование и удаление спрятаны,
         # чтобы зону нельзя было снести случайным кликом.
@@ -155,6 +143,20 @@ class ZoneListItem(QWidget):
         label.setWordWrap(True)
         label.setStyleSheet(list_widget_header_style())
         return label
+
+    def _build_ip_status_labels(self) -> None:
+        self.zone_ip_label = QLabel(self.zone.ip)
+        self.zone_ip_label.setFont(QFont("Arial", 9))
+        self.zone_ip_label.setAlignment(Qt.AlignLeft)
+
+        self.online_status_label = QLabel("Онлайн" if self.zone.is_online else "Не в сети")
+        self.online_status_label.setFont(QFont("Arial", 9))
+        self.online_status_label.setAlignment(Qt.AlignRight)
+
+        self.status_indicator = QLabel()
+        self.status_indicator.setAlignment(Qt.AlignCenter)
+        self.status_indicator.setStyleSheet("QLabel { padding: 2px; }")
+        self.update_status_indicator()
 
     def _build_gear_button(self) -> QToolButton:
         btn = QToolButton()
