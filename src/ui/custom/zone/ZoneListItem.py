@@ -26,77 +26,19 @@ class ZoneListItem(QWidget):
 
     def __init__(self, zone: Orange):
         super().__init__()
-        self.menu_button = QToolButton()
         self.zone = zone
-
         self.setMinimumHeight(140)
-
-        self.checkbox = QCheckBox()
-        self.checkbox.stateChanged.connect(self.change_checked_state)
-        self.zone_info_layout = QHBoxLayout()
-        self.zone_name_layout = QHBoxLayout()
-        self.zone_name_label = QLabel(self.zone.name)
-        self.center_layout = QVBoxLayout()
-        self.left_layout = QVBoxLayout()
-        self.right_layout = QVBoxLayout()
-        self.zone_container = QHBoxLayout()
-
         self.initUI()
 
     def initUI(self):
-        self.setObjectName("zoneCard")  # облик карточки — общий QSS (src/ui/theme.py)
+        self.setObjectName("zoneCard")
         self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(zone_list_item_style())
-
-        # Настройка основных элементов
         self.zone_name_label = self._build_name_label()
-
         self._build_ip_status_labels()
-
-        # Настройка чекбоксов подзон с названиями из репозитория
-        self.subzones_container = self._build_subzones()
-
-        # Главный чекбокс зоны
-        self.checkbox.setChecked(self.zone.isChecked)
-        self.checkbox.setStyleSheet("""
-            QCheckBox::indicator {
-                width: 24px;
-                height: 24px;
-            }
-            QCheckBox {
-                padding: 2px;
-                spacing: 5px;
-            }
-        """)
-
-        # Меню действий (шестерёнка): переименование и удаление спрятаны,
-        # чтобы зону нельзя было снести случайным кликом.
         self.menu_button = self._build_gear_button()
-
-        # Компоновка элементов
-        self.zone_info_layout.addWidget(self.zone_ip_label)
-        self.zone_info_layout.addWidget(self.online_status_label)
-
-        self.left_layout.addWidget(self.checkbox, 1)
-        self.left_layout.addWidget(self.status_indicator, 1)
-        self.left_layout.setSpacing(10)
-
-        self.center_layout.addWidget(self.zone_name_label)
-        self.center_layout.addLayout(self.zone_info_layout)
-        self.center_layout.addWidget(self.subzones_container)
-        self.center_layout.setSpacing(8)
-
-        self.right_layout.addWidget(self.menu_button)
-        self.right_layout.addStretch()
-        self.right_layout.setSpacing(5)
-
-        self.zone_container.addLayout(self.left_layout, 1)
-        self.zone_container.addLayout(self.center_layout, 12)
-        self.zone_container.addLayout(self.right_layout, 1)
-        self.zone_container.setContentsMargins(14, 12, 14, 12)
-        self.zone_container.setSpacing(12)
-
-        self.setLayout(self.zone_container)
+        self.subzones_container = self._build_subzones()
+        self._assemble_layouts()
         self._refresh_accents()
 
     def _build_name_label(self) -> QLabel:
@@ -178,6 +120,50 @@ class ZoneListItem(QWidget):
         container.setLayout(layout)
         container.setStyleSheet("background: transparent;")
         return container
+
+    def _assemble_layouts(self) -> None:
+        self.checkbox = QCheckBox()
+        self.checkbox.setChecked(self.zone.isChecked)
+        self.checkbox.stateChanged.connect(self.change_checked_state)
+        self.checkbox.setStyleSheet("""
+            QCheckBox::indicator {
+                width: 24px;
+                height: 24px;
+            }
+            QCheckBox {
+                padding: 2px;
+                spacing: 5px;
+            }
+        """)
+
+        zone_info_layout = QHBoxLayout()
+        zone_info_layout.addWidget(self.zone_ip_label)
+        zone_info_layout.addWidget(self.online_status_label)
+
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.checkbox, 1)
+        left_layout.addWidget(self.status_indicator, 1)
+        left_layout.setSpacing(10)
+
+        center_layout = QVBoxLayout()
+        center_layout.addWidget(self.zone_name_label)
+        center_layout.addLayout(zone_info_layout)
+        center_layout.addWidget(self.subzones_container)
+        center_layout.setSpacing(8)
+
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.menu_button)
+        right_layout.addStretch()
+        right_layout.setSpacing(5)
+
+        zone_container = QHBoxLayout()
+        zone_container.addLayout(left_layout, 1)
+        zone_container.addLayout(center_layout, 12)
+        zone_container.addLayout(right_layout, 1)
+        zone_container.setContentsMargins(14, 12, 14, 12)
+        zone_container.setSpacing(12)
+
+        self.setLayout(zone_container)
 
     def _refresh_accents(self):
         """Акценты: цветной статус, приглушённый IP, акцентная грань у выбранной зоны."""
