@@ -90,21 +90,7 @@ class ZoneListItem(QWidget):
 
         # Меню действий (шестерёнка): переименование и удаление спрятаны,
         # чтобы зону нельзя было снести случайным кликом.
-        self.menu_button.setIcon(QIcon(f"{img_files}{os.sep}ic-gear.png"))
-        self.menu_button.setIconSize(QSize(22, 22))
-        self.menu_button.setFixedSize(44, 40)
-        self.menu_button.setPopupMode(QToolButton.InstantPopup)
-        self.menu_button.setFocusPolicy(Qt.NoFocus)
-        self.menu_button.setStyleSheet(zone_item_btn())
-
-        zone_menu = QMenu(self)
-        rename_action = QAction("Переименовать", self)
-        delete_action = QAction("Удалить", self)
-        rename_action.triggered.connect(self.rename_zone)
-        delete_action.triggered.connect(self.delete_zone)
-        zone_menu.addAction(rename_action)
-        zone_menu.addAction(delete_action)
-        self.menu_button.setMenu(zone_menu)
+        self.menu_button = self._build_gear_button()
 
         # Настройка чекбоксов подзон с названиями из репозитория
         subzone_style = """
@@ -164,6 +150,26 @@ class ZoneListItem(QWidget):
 
         self.setLayout(self.zone_container)
         self._refresh_accents()
+
+    def _build_gear_button(self) -> QToolButton:
+        btn = QToolButton()
+        btn.setIcon(QIcon(f"{img_files}{os.sep}ic-gear.png"))
+        btn.setIconSize(QSize(22, 22))
+        btn.setFixedSize(44, 40)
+        btn.setPopupMode(QToolButton.InstantPopup)
+        btn.setFocusPolicy(Qt.NoFocus)
+        btn.setAutoRaise(True)
+        btn.setStyleSheet(zone_item_btn())
+
+        zone_menu = QMenu(self)
+        rename_action = QAction("Переименовать", self)
+        delete_action = QAction("Удалить", self)
+        rename_action.triggered.connect(self.rename_zone)
+        delete_action.triggered.connect(self.delete_zone)
+        zone_menu.addAction(rename_action)
+        zone_menu.addAction(delete_action)
+        btn.setMenu(zone_menu)
+        return btn
 
     def _refresh_accents(self):
         """Акценты: цветной статус, приглушённый IP, акцентная грань у выбранной зоны."""
