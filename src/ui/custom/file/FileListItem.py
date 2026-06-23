@@ -33,13 +33,7 @@ class FileListItem(QWidget):
 
         self.menu_button = self._build_gear_button()
 
-        self.header_text = QLabel(self.file_item.header.replace('\n', ' ').replace("_", " "))
-        self.header_text.setFont(QFont("Arial", 12))
-        self.header_text.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-        self.header_text.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.header_text.setWordWrap(True)
-        self.header_text.setObjectName("header")
-        self.header_text.setStyleSheet(list_widget_header_style())
+        self.header_text = self._build_header_label()
 
         self.file_item_text_area = ScrollLabel(self)
         self.file_item_text_area.setText(self.file_item.text)
@@ -143,6 +137,16 @@ class FileListItem(QWidget):
         menu.addAction(delete_action)
         btn.setMenu(menu)
         return btn
+
+    def _build_header_label(self) -> QLabel:
+        label = QLabel(self.file_item.header.replace('\n', ' ').replace("_", " "))
+        label.setFont(QFont("Arial", 12))
+        label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        label.setWordWrap(True)
+        label.setObjectName("header")
+        label.setStyleSheet(list_widget_header_style())
+        return label
 
     def set_selected(self, on: bool):
         """Подсветка карточки выбранного файла акцентной рамкой."""
