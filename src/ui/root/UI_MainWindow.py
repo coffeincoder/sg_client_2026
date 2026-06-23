@@ -117,65 +117,7 @@ class Ui_MainWindow(object):
         self.KSB_label_layout.addWidget(self.KSB_label, 1)
 
         # Групбокс контейнер воспроизведения
-        self.playback_gb = QtWidgets.QGroupBox()
-        self.playback_layout = QtWidgets.QVBoxLayout(self.playback_gb)
-
-        # Stop Button
-        self.stop_btn = QtWidgets.QPushButton(self.playback_gb)
-        self.stop_btn.setMinimumHeight(50)
-
-        # Play Button
-        self.play_btn = QtWidgets.QPushButton(self.playback_gb)
-        self.play_btn.setMinimumHeight(50)
-
-        # Слайдер громкости
-        self.volume_slider_layout = QHBoxLayout()
-        self.volume_slider = QtWidgets.QSlider(self.playback_gb)
-        self.volume_slider.setOrientation(QtCore.Qt.Horizontal)
-        self.volume_slider.setMaximum(100)
-        self.volume_slider.setMinimum(1)
-        self.volume_slider.setValue(100)
-
-        # кнопка обновления громкости на выбранных зонах
-        self.update_volume_on_oranges_btn = QPushButton()
-        self.volume_slider_layout.addWidget(self.volume_slider, 10)
-        self.volume_slider_layout.addWidget(self.update_volume_on_oranges_btn, 1)
-
-        # Label "громкость"
-        self.volume_label = QtWidgets.QLabel(self.playback_gb)
-        # Checkbox "повторять"
-        self.repeat_check_box = QtWidgets.QCheckBox(self.playback_gb)
-        # Spin Box "количество повторов"
-        self.repeat_spin_box = QtWidgets.QSpinBox(self.playback_gb)
-        # Label "количество повторов"
-        self.repeat_label = QtWidgets.QLabel(self.playback_gb)
-
-        # индикатор использования микрофона
-        self.mic_usage_indicator = GifLabel()
-
-        self.playback_layout.addWidget(self.play_btn, 3)
-        self.playback_layout.addWidget(self.stop_btn, 3)
-        self.playback_layout.addWidget(self.volume_label, 1)
-        self.playback_layout.addLayout(self.volume_slider_layout, 2)
-        self.playback_layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
-
-        # checkbox_repeatLabel
-        self.cb_rl_layout = QVBoxLayout()
-        self.cb_rl_layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
-        self.cb_rl_layout.addWidget(self.repeat_check_box, 1)
-        self.cb_rl_layout.addWidget(self.repeat_label, 1)
-
-        # spinbox mic indicator
-        self.sb_mi_layout = QHBoxLayout()
-        self.sb_mi_layout.addWidget(self.repeat_spin_box, 1)
-        self.sb_mi_layout.addWidget(self.mic_usage_indicator, 1)
-        self.sb_mi_layout.addItem(QSpacerItem(200, 40, QSizePolicy.Expanding, QSizePolicy.Expanding))
-
-        self.repeat_plus_now_playing_layout = QVBoxLayout()
-        self.repeat_plus_now_playing_layout.addLayout(self.cb_rl_layout)
-        self.repeat_plus_now_playing_layout.addLayout(self.sb_mi_layout)
-
-        self.playback_layout.addLayout(self.repeat_plus_now_playing_layout, 3)
+        self.playback_gb = self._build_playback_panel()
 
         # кнопка начать трансляцию
         self.realtime_button = QtWidgets.QPushButton()
@@ -461,6 +403,57 @@ class Ui_MainWindow(object):
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
         self.retranslate_ui(MainWindow)
+
+    def _build_playback_panel(self) -> QGroupBox:
+        gb = QtWidgets.QGroupBox()
+
+        self.play_btn = QtWidgets.QPushButton(gb)
+        self.play_btn.setMinimumHeight(50)
+
+        self.stop_btn = QtWidgets.QPushButton(gb)
+        self.stop_btn.setMinimumHeight(50)
+
+        self.volume_label = QtWidgets.QLabel(gb)
+
+        self.volume_slider = QtWidgets.QSlider(gb)
+        self.volume_slider.setOrientation(QtCore.Qt.Horizontal)
+        self.volume_slider.setMaximum(100)
+        self.volume_slider.setMinimum(1)
+        self.volume_slider.setValue(100)
+
+        self.update_volume_on_oranges_btn = QPushButton()
+
+        volume_slider_layout = QHBoxLayout()
+        volume_slider_layout.addWidget(self.volume_slider, 10)
+        volume_slider_layout.addWidget(self.update_volume_on_oranges_btn, 1)
+
+        self.repeat_check_box = QtWidgets.QCheckBox(gb)
+        self.repeat_label = QtWidgets.QLabel(gb)
+        self.repeat_spin_box = QtWidgets.QSpinBox(gb)
+        self.mic_usage_indicator = GifLabel()
+
+        cb_rl_layout = QVBoxLayout()
+        cb_rl_layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        cb_rl_layout.addWidget(self.repeat_check_box, 1)
+        cb_rl_layout.addWidget(self.repeat_label, 1)
+
+        sb_mi_layout = QHBoxLayout()
+        sb_mi_layout.addWidget(self.repeat_spin_box, 1)
+        sb_mi_layout.addWidget(self.mic_usage_indicator, 1)
+        sb_mi_layout.addItem(QSpacerItem(200, 40, QSizePolicy.Expanding, QSizePolicy.Expanding))
+
+        repeat_plus_now_playing_layout = QVBoxLayout()
+        repeat_plus_now_playing_layout.addLayout(cb_rl_layout)
+        repeat_plus_now_playing_layout.addLayout(sb_mi_layout)
+
+        layout = QtWidgets.QVBoxLayout(gb)
+        layout.addWidget(self.play_btn, 3)
+        layout.addWidget(self.stop_btn, 3)
+        layout.addWidget(self.volume_label, 1)
+        layout.addLayout(volume_slider_layout, 2)
+        layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        layout.addLayout(repeat_plus_now_playing_layout, 3)
+        return gb
 
     def set_volume(self):
         logger.info(self.volume_slider.value())
