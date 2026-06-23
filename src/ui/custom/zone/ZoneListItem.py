@@ -5,7 +5,7 @@ import os.path
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QPushButton, QToolButton, QMenu, QAction
 
 from paths import img_files, zones_json
 from src.data.ZoneModel import Orange
@@ -26,8 +26,7 @@ class ZoneListItem(QWidget):
 
     def __init__(self, zone: Orange):
         super().__init__()
-        self.delete_zone_btn = QPushButton()
-        self.rename_zone_btn = QPushButton()
+        self.menu_button = QToolButton()
         self.zone = zone
 
         self.setMinimumHeight(140)
@@ -89,18 +88,22 @@ class ZoneListItem(QWidget):
         self.status_indicator.setStyleSheet("QLabel { padding: 2px; }")
         self.update_status_indicator()
 
-        # Кнопки управления
-        self.delete_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}delete-forever-outline-custom.png"))
-        self.delete_zone_btn.setIconSize(QSize(32, 32))
-        self.delete_zone_btn.setFixedSize(48, 42)
-        self.delete_zone_btn.pressed.connect(self.delete_zone)
-        self.delete_zone_btn.setStyleSheet(zone_item_btn())
+        # Меню действий (шестерёнка): переименование и удаление спрятаны,
+        # чтобы зону нельзя было снести случайным кликом.
+        self.menu_button.setIcon(QIcon(f"{img_files}{os.sep}ic-gear.png"))
+        self.menu_button.setIconSize(QSize(22, 22))
+        self.menu_button.setFixedSize(44, 40)
+        self.menu_button.setPopupMode(QToolButton.InstantPopup)
+        self.menu_button.setStyleSheet(zone_item_btn())
 
-        self.rename_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}ic-gear.png"))
-        self.rename_zone_btn.setIconSize(QSize(24, 24))
-        self.rename_zone_btn.setFixedSize(48, 42)
-        self.rename_zone_btn.pressed.connect(self.rename_zone)
-        self.rename_zone_btn.setStyleSheet(zone_item_btn())
+        zone_menu = QMenu(self)
+        rename_action = QAction("Переименовать", self)
+        delete_action = QAction("Удалить", self)
+        rename_action.triggered.connect(self.rename_zone)
+        delete_action.triggered.connect(self.delete_zone)
+        zone_menu.addAction(rename_action)
+        zone_menu.addAction(delete_action)
+        self.menu_button.setMenu(zone_menu)
 
         # Настройка чекбоксов подзон с названиями из репозитория
         subzone_style = """
@@ -148,8 +151,8 @@ class ZoneListItem(QWidget):
         self.center_layout.addWidget(self.subzones_container)
         self.center_layout.setSpacing(8)
 
-        self.right_layout.addWidget(self.delete_zone_btn)
-        self.right_layout.addWidget(self.rename_zone_btn)
+        self.right_layout.addWidget(self.menu_button)
+        self.right_layout.addStretch()
         self.right_layout.setSpacing(5)
 
         self.zone_container.addLayout(self.left_layout, 1)
