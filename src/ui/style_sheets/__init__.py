@@ -158,13 +158,16 @@ def blue_color_btn():
 def zone_item_btn():
     t = _t()
     return f"""
-             QPushButton {{
+             QToolButton {{
                     background-color: transparent;
                     border: 1px solid transparent;
                     border-radius: 8px;
                 }}
-             QPushButton:hover {{ border-color: {t.accent}; }}
-             QPushButton:pressed {{ background-color: {t.elev}; }}
+             QToolButton:hover {{ border-color: {t.accent}; }}
+             QToolButton:pressed, QToolButton:open {{
+                    border: 1px solid transparent;
+                    background-color: {t.elev};
+                }}
             """
 
 
