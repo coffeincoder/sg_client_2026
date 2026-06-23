@@ -30,8 +30,7 @@ class ZoneListItem(QWidget):
         self.rename_zone_btn = QPushButton()
         self.zone = zone
 
-        self.setMaximumWidth(300)
-        self.setMinimumHeight(150)
+        self.setMinimumHeight(140)
 
         self.status_indicator = QLabel()
         self.checkbox = QCheckBox()
@@ -98,7 +97,7 @@ class ZoneListItem(QWidget):
         self.delete_zone_btn.setStyleSheet(zone_item_btn())
 
         self.rename_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}ic-gear.png"))
-        self.rename_zone_btn.setIconSize(QSize(32, 32))
+        self.rename_zone_btn.setIconSize(QSize(24, 24))
         self.rename_zone_btn.setFixedSize(48, 42)
         self.rename_zone_btn.pressed.connect(self.rename_zone)
         self.rename_zone_btn.setStyleSheet(zone_item_btn())

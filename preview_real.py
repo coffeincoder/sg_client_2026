@@ -141,9 +141,16 @@ def build_left() -> QWidget:
     vol_row.addWidget(vlab)
     vol_row.addWidget(vval)
     pcl.addLayout(vol_row)
+    vol_line = QHBoxLayout()
+    vol_line.setSpacing(8)
     vol = QSlider(Qt.Horizontal)
     vol.setValue(72)
-    pcl.addWidget(vol)
+    vol_update = make_btn("", "arrow-up.png", obj="primary", icon_px=18, min_h=34, tint="#ffffff")
+    vol_update.setFixedWidth(42)
+    vol_update.setToolTip("Обновить громкость на выбранных зонах")
+    vol_line.addWidget(vol, 1)
+    vol_line.addWidget(vol_update)
+    pcl.addLayout(vol_line)
 
     rep_row = QHBoxLayout()
     rep = QCheckBox("Повторять")
@@ -204,6 +211,7 @@ def build_center() -> QWidget:
     file_list = FileListWidget()
     file_list.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     file_list.update_file_list(SAMPLE_FILES, grid_size=1)
+    file_list.selectRow(0)  # демонстрация подсветки выбранного файла
     ftl.addWidget(file_list, 1)
 
     # кнопки добавления — крупные иконки

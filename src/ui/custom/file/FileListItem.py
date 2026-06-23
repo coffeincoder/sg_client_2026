@@ -7,6 +7,8 @@ from paths import sep
 from src.data.FileModel import FileItem
 from src.ui.custom.ScrollLabel import ScrollLabel
 from src.ui.style_sheets import *
+from src.ui.style_sheets import _get_theme
+from src.ui.theme import tokens_for
 
 
 class FileListItem(QWidget):
@@ -137,6 +139,16 @@ class FileListItem(QWidget):
         palette = QPalette()
         palette.setColor(QPalette.Window, QColor('grey'))
         self.setPalette(palette)
+
+    def set_selected(self, on: bool):
+        """Подсветка карточки выбранного файла акцентной рамкой."""
+        if on:
+            t = tokens_for(_get_theme())
+            self.setStyleSheet(
+                f"QWidget#fileCard {{ background: {t.card}; border: 2px solid {t.accent}; border-radius: 12px; }}"
+            )
+        else:
+            self.setStyleSheet("")
 
     def rename_file(self):
         self.rename_clicked.emit(self.file_item)

@@ -19,6 +19,16 @@ class FileListWidget(QTableWidget):
         super(FileListWidget, self).__init__(parent)
         self.setVerticalScrollMode(QAbstractItemView.ScrollPerPixel)
         self.setEditTriggers(QAbstractItemView.NoEditTriggers)
+        self.itemSelectionChanged.connect(self._update_selection_highlight)
+
+    def _update_selection_highlight(self):
+        """Подсветить карточку выбранного файла, снять подсветку с остальных."""
+        selected = {(it.row(), it.column()) for it in self.selectedItems()}
+        for r in range(self.rowCount()):
+            for c in range(self.columnCount()):
+                w = self.cellWidget(r, c)
+                if isinstance(w, FileListItem):
+                    w.set_selected((r, c) in selected)
 
     def add_file(self, file_item: FileItem, row, col):
         widget = QTableWidgetItem()
