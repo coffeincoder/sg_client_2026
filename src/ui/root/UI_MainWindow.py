@@ -132,138 +132,11 @@ class Ui_MainWindow(object):
         # Добавляем QTabWidget в основной контейнер
         self.filelist_container_layout.addWidget(self.filelist_tab_widget, 4)
 
-        # Контейнер для кнопок способов добавления файла
-        self.add_file_buttons_layout = QtWidgets.QHBoxLayout()
-
-        # Общий индикатор каких-то действий снизу списка
-        self.progress_indicator = IndicatorProgressBar(self.central_widget)
-
-        # Кнопки добавления файла
-        self.upload_custom_file_btn = QtWidgets.QPushButton('Загрузить аудиофайл')
-        self.add_file_from_mic_record_btn = QtWidgets.QPushButton('Записать с микрофона')
-        self.add_file_from_text_btn = QtWidgets.QPushButton('Озвучить из текста')
-
-        # Добавляем кнопки в layout
-        self.add_file_buttons_layout.addWidget(self.upload_custom_file_btn, 2)
-        self.add_file_buttons_layout.addWidget(self.add_file_from_mic_record_btn, 2)
-        self.add_file_buttons_layout.addWidget(self.add_file_from_text_btn, 2)
-        self.add_file_buttons_layout.addStretch(1)
-        self.add_file_buttons_layout.addWidget(self.progress_indicator, 1)
-
-        # Добавляем контейнер кнопок в основной контейнер
-        self.filelist_container_layout.addLayout(self.add_file_buttons_layout)
-
-        # контейнер для выбора способа создания файла с кнопками
-        self.add_file_gb = QtWidgets.QGroupBox("Добавление файла")
-        self.add_file_gb.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
-        self.add_file_gb.setStyleSheet("QGroupBox { padding-bottom: 0px; }")
-        self.add_file_layout = QtWidgets.QVBoxLayout(self.add_file_gb)
-
-        #    | способ с добавлением из текста ---------------------
-        # контейнер для способа добавления файла из озвучки текста
-        self.add_file_from_text_layout = QVBoxLayout()
-        # Основное поле для ввода текста
-        self.main_text_edit_field = QtWidgets.QTextEdit(self.central_widget)
-        # текст над кнопками для озвучки текста который отображает выбранный голос
-        self.selected_voice_text = QtWidgets.QLabel()
-        # кнопка для выбора используемого голоса для озвучки
-        self.voice_select_btn = QToolButton()
-        # кнопка для озвучки текста
-        self.text_to_file_btn = QtWidgets.QPushButton()
-        # контейнер, с текстовым полем и кнопками для озвучки
-        self.text_edit_buttons_layout = QtWidgets.QHBoxLayout()
-        self.text_edit_buttons_layout.addWidget(self.selected_voice_text)
-        self.text_edit_buttons_layout.addWidget(self.voice_select_btn)
-        self.text_edit_buttons_layout.addStretch(1)
-        self.text_edit_buttons_layout.addWidget(self.text_to_file_btn)
-        #     --------------------- | способ с добавлением из текста
-
-        #    | способ с добавлением с микрофона ---------------------
-        self.add_from_mic_record_layout = QHBoxLayout()
-        # запись/остановка записи
-        self.record_btn = QtWidgets.QPushButton()
-        self.volume_visualiser = VolumeVisualiser(self.add_file_gb)
-        self.record_timer_label = QLabel("00:00:00")
-        self.record_timer_label.setFont(QFont("Impact", 16, 1))
-        self.add_from_mic_record_layout.addWidget(self.record_timer_label,1)
-        self.add_from_mic_record_layout.addWidget(self.volume_visualiser, 4)
-        self.add_from_mic_record_layout.addWidget(self.record_btn, 1)
-        #     --------------------- | способ с добавлением с микрофона
-
-        self.add_file_from_text_layout.addWidget(self.main_text_edit_field, 10)
-
-        self.add_file_from_text_layout.addLayout(self.text_edit_buttons_layout, 1)
         # Устанавливаем политику размера для содержимого вкладки
         self.current_files_tab.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
         self.file_list_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        # Создаем виджеты для каждого layout
-        self.add_file_from_text_widget = QWidget()
-        self.add_file_from_text_widget.setLayout(self.add_file_from_text_layout)
-
-        self.add_from_mic_record_widget = QWidget()
-        self.add_from_mic_record_widget.setLayout(self.add_from_mic_record_layout)
-
-        # Создаем QStackedLayout
-        self.stacked_widget = QStackedWidget()
-        self.stacked_widget.hide()
-
-        # Добавляем layouts в stacked_layout
-        self.stacked_widget.addWidget(self.add_file_from_text_widget)
-        self.stacked_widget.addWidget(self.add_from_mic_record_widget)
-
-        # Устанавливаем stacked_layout в качестве основного layout для add_file_gb
-        self.add_file_gb.setLayout(self.stacked_widget.layout())
-        # Функция для обновления стиля кнопок
-        def update_button_styles(active_button):
-            if active_button == 'text':
-                self.add_file_from_text_btn.setStyleSheet(f"""
-                                           border: 1px solid #2979FE;
-                                           border-radius: 8px;
-                                           background-color: transparent;
-                                       """)
-                self.add_file_from_mic_record_btn.setStyleSheet(blue_color_btn())
-            elif active_button == 'mic':
-                self.add_file_from_text_btn.setStyleSheet(blue_color_btn())
-                self.add_file_from_mic_record_btn.setStyleSheet(f"""
-                                                           border: 1px solid #2979FE;
-                                                           border-radius: 8px;
-                                                           background-color: transparent;
-                                                       """)
-
-        # Функция для переключения на layout озвучки текста
-        def show_text_to_file_layout():
-
-            if self.stacked_widget.currentIndex() == 0 and self.stacked_widget.isVisible():
-                self.stacked_widget.hide()
-                self.add_file_gb.setFixedHeight(60)
-
-            else:
-                self.stacked_widget.setCurrentIndex(0)
-                self.stacked_widget.show()
-                self.add_file_gb.setFixedHeight(self.add_file_from_text_widget.sizeHint().height())
-                self.add_file_from_text_btn.setStyleSheet(blue_color_btn())
-                update_button_styles("text")
-
-        # Функция для переключения на layout записи с микрофона
-        def show_mic_record_layout():
-            if self.stacked_widget.currentIndex() == 1 and self.stacked_widget.isVisible():
-                self.stacked_widget.hide()
-                self.add_file_gb.setFixedHeight(60)
-
-            else:
-                self.stacked_widget.setCurrentIndex(1)
-                self.stacked_widget.show()
-                self.add_file_gb.setFixedHeight(150)
-                self.add_file_from_mic_record_btn.setStyleSheet(blue_color_btn())
-                update_button_styles("mic")
-
-        # Подключаем кнопки к функциям
-        self.add_file_from_text_btn.clicked.connect(show_text_to_file_layout)
-        self.add_file_from_mic_record_btn.clicked.connect(show_mic_record_layout)
-
-        self.add_file_layout.addLayout(self.add_file_buttons_layout, 1)
-        self.add_file_layout.addWidget(self.stacked_widget, 2)
+        self.add_file_gb = self._build_add_file_panel()
 
         self.center_vertical_layout.addLayout(self.filelist_container_layout)
         self.center_vertical_layout.addWidget(self.add_file_gb)
@@ -424,6 +297,99 @@ class Ui_MainWindow(object):
         tab_widget.addTab(self.current_files_tab, "Файлы")
         tab_widget.addTab(self.scenarios_tab, "сценарии")
         return tab_widget
+
+    def _build_add_file_panel(self) -> QGroupBox:
+        self.upload_custom_file_btn = QtWidgets.QPushButton('Загрузить аудиофайл')
+        self.add_file_from_mic_record_btn = QtWidgets.QPushButton('Записать с микрофона')
+        self.add_file_from_text_btn = QtWidgets.QPushButton('Озвучить из текста')
+        self.progress_indicator = IndicatorProgressBar(self.central_widget)
+
+        add_file_buttons_layout = QtWidgets.QHBoxLayout()
+        add_file_buttons_layout.addWidget(self.upload_custom_file_btn, 2)
+        add_file_buttons_layout.addWidget(self.add_file_from_mic_record_btn, 2)
+        add_file_buttons_layout.addWidget(self.add_file_from_text_btn, 2)
+        add_file_buttons_layout.addStretch(1)
+        add_file_buttons_layout.addWidget(self.progress_indicator, 1)
+
+        # --- текст → файл ---
+        self.main_text_edit_field = QtWidgets.QTextEdit(self.central_widget)
+        self.selected_voice_text = QtWidgets.QLabel()
+        self.voice_select_btn = QToolButton()
+        self.text_to_file_btn = QtWidgets.QPushButton()
+
+        text_edit_buttons_layout = QtWidgets.QHBoxLayout()
+        text_edit_buttons_layout.addWidget(self.selected_voice_text)
+        text_edit_buttons_layout.addWidget(self.voice_select_btn)
+        text_edit_buttons_layout.addStretch(1)
+        text_edit_buttons_layout.addWidget(self.text_to_file_btn)
+
+        add_file_from_text_layout = QVBoxLayout()
+        add_file_from_text_layout.addWidget(self.main_text_edit_field, 10)
+        add_file_from_text_layout.addLayout(text_edit_buttons_layout, 1)
+
+        add_file_from_text_widget = QWidget()
+        add_file_from_text_widget.setLayout(add_file_from_text_layout)
+
+        # --- запись с микрофона ---
+        self.record_btn = QtWidgets.QPushButton()
+        self.volume_visualiser = VolumeVisualiser(self.central_widget)
+        self.record_timer_label = QLabel("00:00:00")
+        self.record_timer_label.setFont(QFont("Impact", 16, 1))
+
+        add_from_mic_record_layout = QHBoxLayout()
+        add_from_mic_record_layout.addWidget(self.record_timer_label, 1)
+        add_from_mic_record_layout.addWidget(self.volume_visualiser, 4)
+        add_from_mic_record_layout.addWidget(self.record_btn, 1)
+
+        add_from_mic_record_widget = QWidget()
+        add_from_mic_record_widget.setLayout(add_from_mic_record_layout)
+
+        # --- stacked + переключение ---
+        self.stacked_widget = QStackedWidget()
+        self.stacked_widget.hide()
+        self.stacked_widget.addWidget(add_file_from_text_widget)
+        self.stacked_widget.addWidget(add_from_mic_record_widget)
+
+        gb = QtWidgets.QGroupBox("Добавление файла")
+        gb.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
+        gb.setStyleSheet("QGroupBox { padding-bottom: 0px; }")
+        self.add_file_layout = QtWidgets.QVBoxLayout(gb)
+        self.add_file_layout.addLayout(add_file_buttons_layout, 1)
+        self.add_file_layout.addWidget(self.stacked_widget, 2)
+
+        def update_button_styles(active_button):
+            if active_button == 'text':
+                self.add_file_from_text_btn.setStyleSheet(
+                    "border: 1px solid #2979FE; border-radius: 8px; background-color: transparent;")
+                self.add_file_from_mic_record_btn.setStyleSheet(blue_color_btn())
+            elif active_button == 'mic':
+                self.add_file_from_text_btn.setStyleSheet(blue_color_btn())
+                self.add_file_from_mic_record_btn.setStyleSheet(
+                    "border: 1px solid #2979FE; border-radius: 8px; background-color: transparent;")
+
+        def show_text_to_file_layout():
+            if self.stacked_widget.currentIndex() == 0 and self.stacked_widget.isVisible():
+                self.stacked_widget.hide()
+                gb.setFixedHeight(60)
+            else:
+                self.stacked_widget.setCurrentIndex(0)
+                self.stacked_widget.show()
+                gb.setFixedHeight(add_file_from_text_widget.sizeHint().height())
+                update_button_styles("text")
+
+        def show_mic_record_layout():
+            if self.stacked_widget.currentIndex() == 1 and self.stacked_widget.isVisible():
+                self.stacked_widget.hide()
+                gb.setFixedHeight(60)
+            else:
+                self.stacked_widget.setCurrentIndex(1)
+                self.stacked_widget.show()
+                gb.setFixedHeight(150)
+                update_button_styles("mic")
+
+        self.add_file_from_text_btn.clicked.connect(show_text_to_file_layout)
+        self.add_file_from_mic_record_btn.clicked.connect(show_mic_record_layout)
+        return gb
 
     def set_volume(self):
         logger.info(self.volume_slider.value())
