@@ -126,6 +126,7 @@ class Ui_MainWindow(object):
 
         #                                                ------------------------------------------>left_vertical_layout
         #                                              center_vertical_layout>------------------------------------------
+        self.filelist_container_layout = QtWidgets.QVBoxLayout()
         self.filelist_tab_widget = self._build_file_list_panel()
 
         # Добавляем QTabWidget в основной контейнер
