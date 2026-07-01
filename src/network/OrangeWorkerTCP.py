@@ -96,7 +96,7 @@ class OrangeWorkerTCP(QThread):
 
         if self.command == "status":
             status_response = create_simple_command(ip, port, self.timeout, {"command": "hello"})
-            if status_response.find("Wrong command") != -1:
+            if status_response.find("Wrong command") != -1 or status_response.find("OK") != -1:
                 self.online_check.emit(True, self.ip)
             else:
                 self.online_check.emit(False, self.ip)
