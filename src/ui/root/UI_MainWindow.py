@@ -61,10 +61,8 @@ class Ui_MainWindow(object):
     sort_by_name_btn: QPushButton
     upload_custom_file_btn: QPushButton
     zone_list_container: QVBoxLayout
-    list_top_controls_layout: QHBoxLayout
     file_list_widget: FileListWidget
     add_file_buttons_layout: QHBoxLayout
-    filelist_container_layout: QVBoxLayout
     zone_list_label: QLabel
     zone_list_widget: ZoneListWidget
     play_local_btn: QPushButton
@@ -97,370 +95,273 @@ class Ui_MainWindow(object):
 
         self.central_widget = QtWidgets.QWidget(MainWindow)
         self.central_widget.setObjectName("centralwidget")
-
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
 
-        main_vertical_layout = QVBoxLayout(self.central_widget)
-        main_horizontal_layout = QHBoxLayout(self.central_widget)
-
-        self.left_vertical_layout = QtWidgets.QVBoxLayout()
-        self.center_vertical_layout = QtWidgets.QVBoxLayout()
-        self.right_vertical_layout = QtWidgets.QVBoxLayout()
-
-        #                                               left_vertical_layout >------------------------------------------
-        # ksb Label "иконка ксб"
         self.KSB_label_layout = QHBoxLayout(self.central_widget)
-        self.KSB_label = QtWidgets.QLabel()
         self.KSB_label = QtWidgets.QLabel()
         self.KSB_label_layout.addWidget(self.KSB_label, 1)
 
-        # Групбокс контейнер воспроизведения
-        self.playback_gb = QtWidgets.QGroupBox()
-        self.playback_layout = QtWidgets.QVBoxLayout(self.playback_gb)
+        self.playback_gb = self._build_playback_panel()
+        self.broadcast_gb = self._build_broadcast_panel()
+        self.filelist_tab_widget = self._build_file_list_panel()
+        self.add_file_gb = self._build_add_file_panel()
+        self.zone_list_container = self._build_zone_panel()
+        self._assemble_main_layout(MainWindow)
 
-        # Stop Button
-        self.stop_btn = QtWidgets.QPushButton(self.playback_gb)
-        self.stop_btn.setMinimumHeight(50)
+        self.retranslate_ui(MainWindow)
 
-        # Play Button
-        self.play_btn = QtWidgets.QPushButton(self.playback_gb)
+    def _build_playback_panel(self) -> QGroupBox:
+        gb = QtWidgets.QGroupBox()
+
+        self.play_btn = QtWidgets.QPushButton(gb)
         self.play_btn.setMinimumHeight(50)
 
-        # Слайдер громкости
-        self.volume_slider_layout = QHBoxLayout()
-        self.volume_slider = QtWidgets.QSlider(self.playback_gb)
+        self.stop_btn = QtWidgets.QPushButton(gb)
+        self.stop_btn.setMinimumHeight(50)
+
+        self.volume_label = QtWidgets.QLabel(gb)
+
+        self.volume_slider = QtWidgets.QSlider(gb)
         self.volume_slider.setOrientation(QtCore.Qt.Horizontal)
         self.volume_slider.setMaximum(100)
         self.volume_slider.setMinimum(1)
         self.volume_slider.setValue(100)
 
-        # кнопка обновления громкости на выбранных зонах
         self.update_volume_on_oranges_btn = QPushButton()
-        self.volume_slider_layout.addWidget(self.volume_slider, 10)
-        self.volume_slider_layout.addWidget(self.update_volume_on_oranges_btn, 1)
 
-        # Label "громкость"
-        self.volume_label = QtWidgets.QLabel(self.playback_gb)
-        # Checkbox "повторять"
-        self.repeat_check_box = QtWidgets.QCheckBox(self.playback_gb)
-        # Spin Box "количество повторов"
-        self.repeat_spin_box = QtWidgets.QSpinBox(self.playback_gb)
-        # Label "количество повторов"
-        self.repeat_label = QtWidgets.QLabel(self.playback_gb)
+        volume_slider_layout = QHBoxLayout()
+        volume_slider_layout.addWidget(self.volume_slider, 10)
+        volume_slider_layout.addWidget(self.update_volume_on_oranges_btn, 1)
 
-        # индикатор использования микрофона
+        self.repeat_check_box = QtWidgets.QCheckBox(gb)
+        self.repeat_label = QtWidgets.QLabel(gb)
+        self.repeat_spin_box = QtWidgets.QSpinBox(gb)
         self.mic_usage_indicator = GifLabel()
 
-        self.playback_layout.addWidget(self.play_btn, 3)
-        self.playback_layout.addWidget(self.stop_btn, 3)
-        self.playback_layout.addWidget(self.volume_label, 1)
-        self.playback_layout.addLayout(self.volume_slider_layout, 2)
-        self.playback_layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        cb_rl_layout = QVBoxLayout()
+        cb_rl_layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        cb_rl_layout.addWidget(self.repeat_check_box, 1)
+        cb_rl_layout.addWidget(self.repeat_label, 1)
 
-        # checkbox_repeatLabel
-        self.cb_rl_layout = QVBoxLayout()
-        self.cb_rl_layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
-        self.cb_rl_layout.addWidget(self.repeat_check_box, 1)
-        self.cb_rl_layout.addWidget(self.repeat_label, 1)
+        sb_mi_layout = QHBoxLayout()
+        sb_mi_layout.addWidget(self.repeat_spin_box, 1)
+        sb_mi_layout.addWidget(self.mic_usage_indicator, 1)
+        sb_mi_layout.addItem(QSpacerItem(200, 40, QSizePolicy.Expanding, QSizePolicy.Expanding))
 
-        # spinbox mic indicator
-        self.sb_mi_layout = QHBoxLayout()
-        self.sb_mi_layout.addWidget(self.repeat_spin_box, 1)
-        self.sb_mi_layout.addWidget(self.mic_usage_indicator, 1)
-        self.sb_mi_layout.addItem(QSpacerItem(200, 40, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        repeat_plus_now_playing_layout = QVBoxLayout()
+        repeat_plus_now_playing_layout.addLayout(cb_rl_layout)
+        repeat_plus_now_playing_layout.addLayout(sb_mi_layout)
 
-        self.repeat_plus_now_playing_layout = QVBoxLayout()
-        self.repeat_plus_now_playing_layout.addLayout(self.cb_rl_layout)
-        self.repeat_plus_now_playing_layout.addLayout(self.sb_mi_layout)
+        layout = QtWidgets.QVBoxLayout(gb)
+        layout.addWidget(self.play_btn, 3)
+        layout.addWidget(self.stop_btn, 3)
+        layout.addWidget(self.volume_label, 1)
+        layout.addLayout(volume_slider_layout, 2)
+        layout.addItem(QSpacerItem(400, 400, QSizePolicy.Expanding, QSizePolicy.Expanding))
+        layout.addLayout(repeat_plus_now_playing_layout, 3)
+        return gb
 
-        self.playback_layout.addLayout(self.repeat_plus_now_playing_layout, 3)
-
-        # кнопка начать трансляцию
+    def _build_broadcast_panel(self) -> QGroupBox:
         self.realtime_button = QtWidgets.QPushButton()
-        # кнопка начать трансляцию
         self.stop_realtime_button = QtWidgets.QPushButton()
 
-        # Группбокс "Трансляция"
-        self.broadcast_gb = QtWidgets.QGroupBox("Трансляция")
-        self.broadcast_layout = QtWidgets.QVBoxLayout(self.broadcast_gb)
-        self.broadcast_layout.addWidget(self.realtime_button, 1)
-        self.broadcast_layout.addWidget(self.stop_realtime_button, 1)
+        gb = QtWidgets.QGroupBox("Трансляция")
+        layout = QtWidgets.QVBoxLayout(gb)
+        layout.addWidget(self.realtime_button, 1)
+        layout.addWidget(self.stop_realtime_button, 1)
+        return gb
 
-        self.left_vertical_layout.addLayout(self.KSB_label_layout, 1)
-        self.left_vertical_layout.addWidget(self.playback_gb, 5)
-        self.left_vertical_layout.addWidget(self.broadcast_gb, 1)
-
-        #                                                ------------------------------------------>left_vertical_layout
-        # виджет со списком файлов
+    def _build_file_list_panel(self) -> QTabWidget:
         self.file_list_widget = FileListWidget(self.central_widget)
+        self.file_list_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
 
-        #                                              center_vertical_layout>------------------------------------------
-        # контейнер со списком файлов и кнопками управления списка
-        self.filelist_container_layout = QtWidgets.QVBoxLayout()
-        # контейнер с элементами управления списком
-        self.list_top_controls_layout = QtWidgets.QHBoxLayout()
-
-        # контейнер слайдера для установки масштаба отображения списка
-        self.list_scale_controls_layout = QHBoxLayout()
-        self.list_scale_controls_layout.setContentsMargins(0, 0, 0, 0)
-
-        # надпись над слайдером
-        text_field = QLabel('масштаб')
-        text_field.setFixedHeight(20)
-
-        # сам слайдер для установки масштаба отображения списка
         self.list_scale_slider = QtWidgets.QSlider(Qt.Horizontal)
         self.list_scale_slider.setMinimum(1)
         self.list_scale_slider.setMaximum(4)
         self.list_scale_slider.setFixedHeight(25)
         self.list_scale_slider.setFixedWidth(50)
 
-        # кнопки сортировки списка
-        self.sort_by_name_btn = QtWidgets.QPushButton("А-Я")
-        self.sort_by_date_btn = QtWidgets.QPushButton('дд.мм')
-        # Добавляем layout управления масштабом в основной layout управления списком
-        self.list_top_controls_layout.addLayout(self.list_scale_controls_layout)
+        text_field = QLabel('масштаб')
+        text_field.setFixedHeight(20)
 
-        # кнопки сортировки списка
-        self.sort_by_name_btn = QtWidgets.QPushButton("А-Я")
-        self.sort_by_date_btn = QtWidgets.QPushButton('дд.мм')
-        # Добавляем элементы в layout управления масштабом
+        self.list_scale_controls_layout = QHBoxLayout()
+        self.list_scale_controls_layout.setContentsMargins(0, 0, 0, 0)
         self.list_scale_controls_layout.addWidget(text_field)
         self.list_scale_controls_layout.addWidget(self.list_scale_slider)
-        self.list_scale_controls_layout.addStretch()  # Добавляем растягивающийся элемент
+        self.list_scale_controls_layout.addStretch()
 
-        # Добавляем кнопки сортировки в layout
-        self.list_top_controls_layout.addWidget(self.sort_by_name_btn)
-        self.list_top_controls_layout.addWidget(self.sort_by_date_btn)
-        # Создаем QTabWidget для отображения вкладок
-        self.filelist_tab_widget = QtWidgets.QTabWidget(self.central_widget)
+        self.sort_by_name_btn = QtWidgets.QPushButton("А-Я")
+        self.sort_by_date_btn = QtWidgets.QPushButton('дд.мм')
 
-        # Создаем виджет для вкладки со списком файлов
+        list_top_controls_layout = QtWidgets.QHBoxLayout()
+        list_top_controls_layout.addLayout(self.list_scale_controls_layout)
+        list_top_controls_layout.addWidget(self.sort_by_name_btn)
+        list_top_controls_layout.addWidget(self.sort_by_date_btn)
+
         self.current_files_tab = QWidget()
+        self.current_files_tab.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        current_files_layout = QVBoxLayout(self.current_files_tab)
+        current_files_layout.setContentsMargins(0, 0, 0, 0)
+        current_files_layout.setSpacing(0)
+        current_files_layout.addLayout(list_top_controls_layout, 0)
+        current_files_layout.addWidget(self.file_list_widget, 1)
 
-        # Устанавливаем layout для вкладки
-        self.current_files_layout = QVBoxLayout(self.current_files_tab)
-
-        # Убираем отступы и spacing
-        self.current_files_layout.setContentsMargins(0, 0, 0, 0)
-        self.current_files_layout.setSpacing(0)
-
-        # Добавляем элементы управления и сам список файлов в layout вкладки
-        self.current_files_layout.addLayout(self.list_top_controls_layout, 0)
-        self.current_files_layout.addWidget(self.file_list_widget, 1)
-
-        # Устанавливаем layout на вкладку
-        self.current_files_tab.setLayout(self.current_files_layout)
-
-        # Добавляем вкладку в QTabWidget
-        self.filelist_tab_widget.addTab(self.current_files_tab, "Файлы")
-        #
-        # Создаем виджет для вкладки "сценарии"
         self.scenarios_tab = QWidget()
         self.scenarios_tab.setMaximumWidth(900)
-        # Устанавливаем layout для вкладки
         self.scenarios_layout = QVBoxLayout(self.scenarios_tab)
 
-        # Устанавливаем layout на вкладку
-        self.scenarios_tab.setLayout(self.scenarios_layout)
+        tab_widget = QtWidgets.QTabWidget(self.central_widget)
+        tab_widget.addTab(self.current_files_tab, "Файлы")
+        tab_widget.addTab(self.scenarios_tab, "сценарии")
+        return tab_widget
 
-        # Добавляем вкладку "сценарии" в QTabWidget
-        self.filelist_tab_widget.addTab(self.scenarios_tab, "сценарии")
-
-        # Добавляем QTabWidget в основной контейнер
-        self.filelist_container_layout.addWidget(self.filelist_tab_widget, 4)
-
-        # Контейнер для кнопок способов добавления файла
-        self.add_file_buttons_layout = QtWidgets.QHBoxLayout()
-
-        # Общий индикатор каких-то действий снизу списка
-        self.progress_indicator = IndicatorProgressBar(self.central_widget)
-
-        # Кнопки добавления файла
+    def _build_add_file_panel(self) -> QGroupBox:
         self.upload_custom_file_btn = QtWidgets.QPushButton('Загрузить аудиофайл')
         self.add_file_from_mic_record_btn = QtWidgets.QPushButton('Записать с микрофона')
         self.add_file_from_text_btn = QtWidgets.QPushButton('Озвучить из текста')
+        self.progress_indicator = IndicatorProgressBar(self.central_widget)
 
-        # Добавляем кнопки в layout
-        self.add_file_buttons_layout.addWidget(self.upload_custom_file_btn, 2)
-        self.add_file_buttons_layout.addWidget(self.add_file_from_mic_record_btn, 2)
-        self.add_file_buttons_layout.addWidget(self.add_file_from_text_btn, 2)
-        self.add_file_buttons_layout.addStretch(1)
-        self.add_file_buttons_layout.addWidget(self.progress_indicator, 1)
+        add_file_buttons_layout = QtWidgets.QHBoxLayout()
+        add_file_buttons_layout.addWidget(self.upload_custom_file_btn, 2)
+        add_file_buttons_layout.addWidget(self.add_file_from_mic_record_btn, 2)
+        add_file_buttons_layout.addWidget(self.add_file_from_text_btn, 2)
+        add_file_buttons_layout.addStretch(1)
+        add_file_buttons_layout.addWidget(self.progress_indicator, 1)
 
-        # Добавляем контейнер кнопок в основной контейнер
-        self.filelist_container_layout.addLayout(self.add_file_buttons_layout)
-
-        # контейнер для выбора способа создания файла с кнопками
-        self.add_file_gb = QtWidgets.QGroupBox("Добавление файла")
-        self.add_file_gb.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
-        self.add_file_gb.setStyleSheet("QGroupBox { padding-bottom: 0px; }")
-        self.add_file_layout = QtWidgets.QVBoxLayout(self.add_file_gb)
-
-        #    | способ с добавлением из текста ---------------------
-        # контейнер для способа добавления файла из озвучки текста
-        self.add_file_from_text_layout = QVBoxLayout()
-        # Основное поле для ввода текста
+        # --- текст → файл ---
         self.main_text_edit_field = QtWidgets.QTextEdit(self.central_widget)
-        # текст над кнопками для озвучки текста который отображает выбранный голос
         self.selected_voice_text = QtWidgets.QLabel()
-        # кнопка для выбора используемого голоса для озвучки
         self.voice_select_btn = QToolButton()
-        # кнопка для озвучки текста
         self.text_to_file_btn = QtWidgets.QPushButton()
-        # контейнер, с текстовым полем и кнопками для озвучки
-        self.text_edit_buttons_layout = QtWidgets.QHBoxLayout()
-        self.text_edit_buttons_layout.addWidget(self.selected_voice_text)
-        self.text_edit_buttons_layout.addWidget(self.voice_select_btn)
-        self.text_edit_buttons_layout.addStretch(1)
-        self.text_edit_buttons_layout.addWidget(self.text_to_file_btn)
-        #     --------------------- | способ с добавлением из текста
 
-        #    | способ с добавлением с микрофона ---------------------
-        self.add_from_mic_record_layout = QHBoxLayout()
-        # запись/остановка записи
+        text_edit_buttons_layout = QtWidgets.QHBoxLayout()
+        text_edit_buttons_layout.addWidget(self.selected_voice_text)
+        text_edit_buttons_layout.addWidget(self.voice_select_btn)
+        text_edit_buttons_layout.addStretch(1)
+        text_edit_buttons_layout.addWidget(self.text_to_file_btn)
+
+        add_file_from_text_layout = QVBoxLayout()
+        add_file_from_text_layout.addWidget(self.main_text_edit_field, 10)
+        add_file_from_text_layout.addLayout(text_edit_buttons_layout, 1)
+
+        add_file_from_text_widget = QWidget()
+        add_file_from_text_widget.setLayout(add_file_from_text_layout)
+
+        # --- запись с микрофона ---
         self.record_btn = QtWidgets.QPushButton()
-        self.volume_visualiser = VolumeVisualiser(self.add_file_gb)
+        self.volume_visualiser = VolumeVisualiser(self.central_widget)
         self.record_timer_label = QLabel("00:00:00")
         self.record_timer_label.setFont(QFont("Impact", 16, 1))
-        self.add_from_mic_record_layout.addWidget(self.record_timer_label,1)
-        self.add_from_mic_record_layout.addWidget(self.volume_visualiser, 4)
-        self.add_from_mic_record_layout.addWidget(self.record_btn, 1)
-        #     --------------------- | способ с добавлением с микрофона
 
-        self.add_file_from_text_layout.addWidget(self.main_text_edit_field, 10)
+        add_from_mic_record_layout = QHBoxLayout()
+        add_from_mic_record_layout.addWidget(self.record_timer_label, 1)
+        add_from_mic_record_layout.addWidget(self.volume_visualiser, 4)
+        add_from_mic_record_layout.addWidget(self.record_btn, 1)
 
-        self.add_file_from_text_layout.addLayout(self.text_edit_buttons_layout, 1)
-        # Устанавливаем политику размера для содержимого вкладки
-        self.current_files_tab.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
-        self.file_list_widget.setSizePolicy(QtWidgets.QSizePolicy.Expanding, QtWidgets.QSizePolicy.Expanding)
+        add_from_mic_record_widget = QWidget()
+        add_from_mic_record_widget.setLayout(add_from_mic_record_layout)
 
-        # Создаем виджеты для каждого layout
-        self.add_file_from_text_widget = QWidget()
-        self.add_file_from_text_widget.setLayout(self.add_file_from_text_layout)
-
-        self.add_from_mic_record_widget = QWidget()
-        self.add_from_mic_record_widget.setLayout(self.add_from_mic_record_layout)
-
-        # Создаем QStackedLayout
+        # --- stacked + переключение ---
         self.stacked_widget = QStackedWidget()
         self.stacked_widget.hide()
+        self.stacked_widget.addWidget(add_file_from_text_widget)
+        self.stacked_widget.addWidget(add_from_mic_record_widget)
 
-        # Добавляем layouts в stacked_layout
-        self.stacked_widget.addWidget(self.add_file_from_text_widget)
-        self.stacked_widget.addWidget(self.add_from_mic_record_widget)
+        gb = QtWidgets.QGroupBox("Добавление файла")
+        gb.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
+        gb.setStyleSheet("QGroupBox { padding-bottom: 0px; }")
+        self.add_file_layout = QtWidgets.QVBoxLayout(gb)
+        self.add_file_layout.addLayout(add_file_buttons_layout, 1)
+        self.add_file_layout.addWidget(self.stacked_widget, 2)
 
-        # Устанавливаем stacked_layout в качестве основного layout для add_file_gb
-        self.add_file_gb.setLayout(self.stacked_widget.layout())
-        self.current_files_layout.setSpacing(0)  # Убираем отступы между элементами
-        self.current_files_layout.setContentsMargins(0, 0, 0, 0)  # Убираем внешние отступы
-        # Функция для обновления стиля кнопок
         def update_button_styles(active_button):
             if active_button == 'text':
-                self.add_file_from_text_btn.setStyleSheet(f"""
-                                           border: 1px solid #2979FE;
-                                           border-radius: 8px;
-                                           background-color: transparent;
-                                       """)
+                self.add_file_from_text_btn.setStyleSheet(
+                    "border: 1px solid #2979FE; border-radius: 8px; background-color: transparent;")
                 self.add_file_from_mic_record_btn.setStyleSheet(blue_color_btn())
             elif active_button == 'mic':
                 self.add_file_from_text_btn.setStyleSheet(blue_color_btn())
-                self.add_file_from_mic_record_btn.setStyleSheet(f"""
-                                                           border: 1px solid #2979FE;
-                                                           border-radius: 8px;
-                                                           background-color: transparent;
-                                                       """)
+                self.add_file_from_mic_record_btn.setStyleSheet(
+                    "border: 1px solid #2979FE; border-radius: 8px; background-color: transparent;")
 
-        # Функция для переключения на layout озвучки текста
         def show_text_to_file_layout():
-
             if self.stacked_widget.currentIndex() == 0 and self.stacked_widget.isVisible():
                 self.stacked_widget.hide()
-                self.add_file_gb.setFixedHeight(60)
-
+                gb.setFixedHeight(60)
             else:
                 self.stacked_widget.setCurrentIndex(0)
                 self.stacked_widget.show()
-                self.add_file_gb.setFixedHeight(self.add_file_from_text_widget.sizeHint().height())
-                self.add_file_from_text_btn.setStyleSheet(blue_color_btn())
+                gb.setFixedHeight(add_file_from_text_widget.sizeHint().height())
                 update_button_styles("text")
 
-        # Функция для переключения на layout записи с микрофона
         def show_mic_record_layout():
             if self.stacked_widget.currentIndex() == 1 and self.stacked_widget.isVisible():
                 self.stacked_widget.hide()
-                self.add_file_gb.setFixedHeight(60)
-
+                gb.setFixedHeight(60)
             else:
                 self.stacked_widget.setCurrentIndex(1)
                 self.stacked_widget.show()
-                self.add_file_gb.setFixedHeight(150)
-                self.add_file_from_mic_record_btn.setStyleSheet(blue_color_btn())
+                gb.setFixedHeight(150)
                 update_button_styles("mic")
 
-        # Подключаем кнопки к функциям
         self.add_file_from_text_btn.clicked.connect(show_text_to_file_layout)
         self.add_file_from_mic_record_btn.clicked.connect(show_mic_record_layout)
+        return gb
 
-        self.add_file_layout.addLayout(self.add_file_buttons_layout, 1)
-        self.add_file_layout.addWidget(self.stacked_widget, 2)
-
-        self.center_vertical_layout.addLayout(self.filelist_container_layout)
-        self.center_vertical_layout.addWidget(self.add_file_gb)
-        #                                              ------------------------------------------>center_vertical_layout
-
-        #                                               right_vertical_layout>------------------------------------------
-        # контейнер для списка зон и кнопками управления этим списком
-        self.zone_list_container = QtWidgets.QVBoxLayout()
-
-        # надпись над списком зон
+    def _build_zone_panel(self) -> QVBoxLayout:
         self.zone_list_label = QtWidgets.QLabel()
 
-        # контейнер для кнопок над списком зон
-        self.zone_buttons_layout = QtWidgets.QHBoxLayout()
-
-        # кнопка авто поиска зон над списком
         self.auto_search_zones_btn = QtWidgets.QPushButton()
-        # кнопка добавления зоны над списком
         self.zone_add_btn = QtWidgets.QPushButton()
-        # кнопка обновления зон над списком
         self.zone_refresh_btn = QtWidgets.QPushButton()
 
-        # индикатор загрузки зон под кнопками управления
-        self.zone_process_indicator = IndicatorProgressBar(self.central_widget)
-
-        # виджет списка зон
-        self.zone_list_widget = ZoneListWidget(self.central_widget)
-
+        self.zone_buttons_layout = QtWidgets.QHBoxLayout()
         self.zone_buttons_layout.addWidget(self.auto_search_zones_btn)
         self.zone_buttons_layout.addWidget(self.zone_add_btn)
         self.zone_buttons_layout.addWidget(self.zone_refresh_btn)
 
-        self.zone_list_container.addWidget(self.zone_list_label)
-        self.zone_list_container.addLayout(self.zone_buttons_layout)
-        self.zone_list_container.addWidget(self.zone_process_indicator)
-        self.zone_list_container.addWidget(self.zone_list_widget)
+        self.zone_process_indicator = IndicatorProgressBar(self.central_widget)
+        self.zone_list_widget = ZoneListWidget(self.central_widget)
 
+        layout = QtWidgets.QVBoxLayout()
+        layout.addWidget(self.zone_list_label)
+        layout.addLayout(self.zone_buttons_layout)
+        layout.addWidget(self.zone_process_indicator)
+        layout.addWidget(self.zone_list_widget)
+        return layout
+
+    def _assemble_main_layout(self, MainWindow) -> None:
+        self.left_vertical_layout = QtWidgets.QVBoxLayout()
+        self.left_vertical_layout.addLayout(self.KSB_label_layout, 1)
+        self.left_vertical_layout.addWidget(self.playback_gb, 5)
+        self.left_vertical_layout.addWidget(self.broadcast_gb, 1)
+
+        filelist_container_layout = QtWidgets.QVBoxLayout()
+        filelist_container_layout.addWidget(self.filelist_tab_widget, 4)
+        filelist_container_layout.addWidget(self.add_file_gb)
+
+        self.center_vertical_layout = QtWidgets.QVBoxLayout()
+        self.center_vertical_layout.addLayout(filelist_container_layout)
+
+        self.right_vertical_layout = QtWidgets.QVBoxLayout()
         self.right_vertical_layout.addLayout(self.zone_list_container, 15)
 
-        #                                               ------------------------------------------>right_vertical_layout
-
+        main_horizontal_layout = QHBoxLayout(self.central_widget)
         main_horizontal_layout.addLayout(self.left_vertical_layout, 2)
         main_horizontal_layout.addLayout(self.center_vertical_layout, 10)
         main_horizontal_layout.addLayout(self.right_vertical_layout, 3)
 
-        # Progress Bar для отображения прогресса загрузки
         self.progressBar = QtWidgets.QProgressBar(self.central_widget)
+        self.progressBar.setMaximumHeight(25)
 
+        main_vertical_layout = QVBoxLayout(self.central_widget)
         main_vertical_layout.addLayout(main_horizontal_layout)
         main_vertical_layout.addWidget(self.progressBar)
 
         MainWindow.setCentralWidget(self.central_widget)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
-
-        self.retranslate_ui(MainWindow)
 
     def set_volume(self):
         logger.info(self.volume_slider.value())

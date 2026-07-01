@@ -5,7 +5,7 @@ import os.path
 
 from PyQt5.QtCore import Qt, pyqtSignal, QSize
 from PyQt5.QtGui import QPixmap, QIcon
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QPushButton
+from PyQt5.QtWidgets import QCheckBox, QHBoxLayout, QPushButton, QToolButton, QMenu, QAction
 
 from paths import img_files, zones_json
 from src.data.ZoneModel import Orange
@@ -13,7 +13,8 @@ from src.data.ZoneModel import Orange
 from PyQt5.QtWidgets import QWidget, QVBoxLayout, QLabel, QSizePolicy
 from PyQt5.QtGui import QFont
 
-from src.ui.style_sheets import list_widget_header_style, zone_list_item_style, blue_color_btn, zone_item_btn
+from src.ui.style_sheets import list_widget_header_style, zone_list_item_style, blue_color_btn, zone_item_btn, _get_theme
+from src.ui.theme import tokens_for
 
 logger = logging.getLogger(__name__)
 
@@ -25,80 +26,65 @@ class ZoneListItem(QWidget):
 
     def __init__(self, zone: Orange):
         super().__init__()
-        self.delete_zone_btn = QPushButton()
-        self.rename_zone_btn = QPushButton()
         self.zone = zone
-
-        self.setMaximumWidth(300)
-        self.setMinimumHeight(150)
-
-        self.status_indicator = QLabel()
-        self.checkbox = QCheckBox()
-        self.checkbox.stateChanged.connect(self.change_checked_state)
-        self.online_status_label = QLabel("Онлайн" if self.zone.is_online else "Не в сети")
-        self.zone_ip_label = QLabel(self.zone.ip)
-        self.zone_info_layout = QHBoxLayout()
-        self.zone_name_layout = QHBoxLayout()
-        self.zone_name_label = QLabel(self.zone.name)
-        self.center_layout = QVBoxLayout()
-        self.left_layout = QVBoxLayout()
-        self.right_layout = QVBoxLayout()
-        self.zone_container = QHBoxLayout()
-
-        # Чекбоксы для подзон с названиями из репозитория
-        self.subzone1_checkbox = QCheckBox(self.zone.subzone1_name or "Подзона 1")
-        self.subzone2_checkbox = QCheckBox(self.zone.subzone2_name or "Подзона 2")
-        self.subzones_layout = QVBoxLayout()
-        self.subzones_container = QWidget()
-
+        self.setMinimumHeight(140)
         self.initUI()
 
     def initUI(self):
+        self.setObjectName("zoneCard")
+        self.setAttribute(Qt.WA_StyledBackground, True)
         self.setStyleSheet(zone_list_item_style())
+        self.zone_name_label = self._build_name_label()
+        self._build_ip_status_labels()
+        self.menu_button = self._build_gear_button()
+        self.subzones_container = self._build_subzones()
+        self._assemble_layouts()
+        self._refresh_accents()
 
-        # Настройка основных элементов
-        self.zone_name_label.setFont(QFont("Arial", 10, QFont.Bold))
-        self.zone_name_label.setAlignment(Qt.AlignLeft)
-        self.zone_name_label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        self.zone_name_label.setWordWrap(True)
-        self.zone_name_label.setStyleSheet(list_widget_header_style())
+    def _build_name_label(self) -> QLabel:
+        label = QLabel(self.zone.name)
+        label.setFont(QFont("Arial", 10, QFont.Bold))
+        label.setAlignment(Qt.AlignLeft)
+        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
+        label.setWordWrap(True)
+        label.setStyleSheet(list_widget_header_style())
+        return label
 
+    def _build_ip_status_labels(self) -> None:
+        self.zone_ip_label = QLabel(self.zone.ip)
         self.zone_ip_label.setFont(QFont("Arial", 9))
         self.zone_ip_label.setAlignment(Qt.AlignLeft)
 
+        self.online_status_label = QLabel("Онлайн" if self.zone.is_online else "Не в сети")
         self.online_status_label.setFont(QFont("Arial", 9))
         self.online_status_label.setAlignment(Qt.AlignRight)
 
-        # Главный чекбокс зоны
-        self.checkbox.setChecked(self.zone.isChecked)
-        self.checkbox.setStyleSheet("""
-            QCheckBox::indicator { 
-                width: 24px; 
-                height: 24px;
-            }
-            QCheckBox {
-                padding: 2px;
-                spacing: 5px;
-            }
-        """)
-
-        # Индикатор статуса
+        self.status_indicator = QLabel()
         self.status_indicator.setAlignment(Qt.AlignCenter)
         self.status_indicator.setStyleSheet("QLabel { padding: 2px; }")
         self.update_status_indicator()
 
-        # Кнопки управления
-        self.delete_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}delete-forever-outline-custom.png"))
-        self.delete_zone_btn.setIconSize(QSize(26, 26))
-        self.delete_zone_btn.pressed.connect(self.delete_zone)
-        self.delete_zone_btn.setStyleSheet(zone_item_btn())
+    def _build_gear_button(self) -> QToolButton:
+        btn = QToolButton()
+        btn.setIcon(QIcon(f"{img_files}{os.sep}ic-gear.png"))
+        btn.setIconSize(QSize(22, 22))
+        btn.setFixedSize(44, 40)
+        btn.setPopupMode(QToolButton.InstantPopup)
+        btn.setFocusPolicy(Qt.NoFocus)
+        btn.setAutoRaise(True)
+        btn.setStyleSheet(zone_item_btn())
 
-        self.rename_zone_btn.setIcon(QIcon(f"{img_files}{os.sep}rename.png"))
-        self.rename_zone_btn.setIconSize(QSize(26, 26))
-        self.rename_zone_btn.pressed.connect(self.rename_zone)
-        self.rename_zone_btn.setStyleSheet(zone_item_btn())
+        zone_menu = QMenu(self)
+        rename_action = QAction("Переименовать", self)
+        delete_action = QAction("Удалить", self)
+        rename_action.triggered.connect(self.rename_zone)
+        delete_action.triggered.connect(self.delete_zone)
+        zone_menu.addAction(rename_action)
+        zone_menu.addAction(delete_action)
+        btn.setMenu(zone_menu)
+        return btn
 
-        # Настройка чекбоксов подзон с названиями из репозитория
+    def _build_subzones(self) -> QWidget:
         subzone_style = """
             QCheckBox {
                 font-size: 11px;
@@ -110,6 +96,8 @@ class ZoneListItem(QWidget):
                 height: 16px;
             }
         """
+        self.subzone1_checkbox = QCheckBox(self.zone.subzone1_name or "Подзона 1")
+        self.subzone2_checkbox = QCheckBox(self.zone.subzone2_name or "Подзона 2")
 
         self.subzone1_checkbox.setStyleSheet(subzone_style)
         self.subzone2_checkbox.setStyleSheet(subzone_style)
@@ -121,39 +109,85 @@ class ZoneListItem(QWidget):
         self.subzone1_checkbox.stateChanged.connect(self.update_subzone1_state)
         self.subzone2_checkbox.stateChanged.connect(self.update_subzone2_state)
 
-        # Вертикальное расположение подзон
-        self.subzones_layout.addWidget(self.subzone1_checkbox)
-        self.subzones_layout.addWidget(self.subzone2_checkbox)
-        self.subzones_layout.addStretch()
-        self.subzones_layout.setSpacing(5)
-        self.subzones_layout.setContentsMargins(10, 5, 5, 5)
+        layout = QVBoxLayout()
+        layout.addWidget(self.subzone1_checkbox)
+        layout.addWidget(self.subzone2_checkbox)
+        layout.addStretch()
+        layout.setSpacing(5)
+        layout.setContentsMargins(10, 5, 5, 5)
 
-        self.subzones_container.setLayout(self.subzones_layout)
-        self.subzones_container.setStyleSheet("background-color: rgba(200, 200, 200, 30); border-radius: 5px;")
+        container = QWidget()
+        container.setLayout(layout)
+        container.setStyleSheet("background: transparent;")
+        return container
 
-        # Компоновка элементов
-        self.zone_info_layout.addWidget(self.zone_ip_label)
-        self.zone_info_layout.addWidget(self.online_status_label)
+    def _assemble_layouts(self) -> None:
+        self.checkbox = QCheckBox()
+        self.checkbox.setChecked(self.zone.isChecked)
+        self.checkbox.stateChanged.connect(self.change_checked_state)
+        self.checkbox.setStyleSheet("""
+            QCheckBox::indicator {
+                width: 24px;
+                height: 24px;
+            }
+            QCheckBox {
+                padding: 2px;
+                spacing: 5px;
+            }
+        """)
 
-        self.left_layout.addWidget(self.checkbox, 1)
-        self.left_layout.addWidget(self.status_indicator, 1)
-        self.left_layout.setSpacing(10)
+        zone_info_layout = QHBoxLayout()
+        zone_info_layout.addWidget(self.zone_ip_label)
+        zone_info_layout.addWidget(self.online_status_label)
 
-        self.center_layout.addWidget(self.zone_name_label)
-        self.center_layout.addLayout(self.zone_info_layout)
-        self.center_layout.addWidget(self.subzones_container)
-        self.center_layout.setSpacing(5)
+        left_layout = QVBoxLayout()
+        left_layout.addWidget(self.checkbox, 1)
+        left_layout.addWidget(self.status_indicator, 1)
+        left_layout.setSpacing(10)
 
-        self.right_layout.addWidget(self.delete_zone_btn)
-        self.right_layout.addWidget(self.rename_zone_btn)
-        self.right_layout.setSpacing(5)
+        center_layout = QVBoxLayout()
+        center_layout.addWidget(self.zone_name_label)
+        center_layout.addLayout(zone_info_layout)
+        center_layout.addWidget(self.subzones_container)
+        center_layout.setSpacing(8)
 
-        self.zone_container.addLayout(self.left_layout, 1)
-        self.zone_container.addLayout(self.center_layout, 12)
-        self.zone_container.addLayout(self.right_layout, 1)
-        self.zone_container.setContentsMargins(5, 5, 5, 5)
+        right_layout = QVBoxLayout()
+        right_layout.addWidget(self.menu_button)
+        right_layout.addStretch()
+        right_layout.setSpacing(5)
 
-        self.setLayout(self.zone_container)
+        zone_container = QHBoxLayout()
+        zone_container.addLayout(left_layout, 1)
+        zone_container.addLayout(center_layout, 12)
+        zone_container.addLayout(right_layout, 1)
+        zone_container.setContentsMargins(14, 12, 14, 12)
+        zone_container.setSpacing(12)
+
+        self.setLayout(zone_container)
+
+    def _refresh_accents(self):
+        """Акценты: цветной статус, приглушённый IP, акцентная грань у выбранной зоны."""
+        t = tokens_for(_get_theme())
+        if self.zone.is_playing:
+            color, text = t.accent, "Играет"
+        elif self.zone.is_streaming:
+            color, text = t.accent, "Вещание"
+        elif self.zone.is_sip_running:
+            color, text = t.accent, "Звонок"
+        elif self.zone.is_online:
+            color, text = t.online, "Онлайн"
+        else:
+            color, text = t.muted, "Не в сети"
+        self.online_status_label.setText(text)
+        self.online_status_label.setStyleSheet(f"color: {color}; font-weight: 600; background: transparent;")
+        self.zone_ip_label.setStyleSheet(f"color: {t.muted}; background: transparent;")
+        if self.zone.isChecked:
+            self.setStyleSheet(
+                f"QWidget#zoneCard {{ background: {t.card}; border: 1px solid {t.border};"
+                f" border-left: 3px solid {t.accent}; border-radius: 12px; }}"
+            )
+        else:
+            self.setStyleSheet("")
 
     def update_subzone_labels(self):
         """Обновляет названия подзон из данных зоны"""
@@ -173,6 +207,7 @@ class ZoneListItem(QWidget):
         self.zone_ip_label.setText(zone.ip)
         self.zone_name_label.setText(zone.name)
         self.update_status_indicator()
+        self._refresh_accents()
 
     def update_status_indicator(self):
         if self.zone.is_playing:
@@ -200,6 +235,7 @@ class ZoneListItem(QWidget):
         self.subzone1_checkbox.setEnabled(self.zone.isChecked)
         self.subzone2_checkbox.setEnabled(self.zone.isChecked)
         self.save_zone_state()
+        self._refresh_accents()
 
     def update_subzone1_state(self, state):
         self.zone.subzone1 = state == Qt.Checked

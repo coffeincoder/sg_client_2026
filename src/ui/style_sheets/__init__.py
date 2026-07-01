@@ -3,6 +3,7 @@ import json
 
 import paths
 from src.ui import Colors
+from src.ui.theme import tokens_for
 
 
 def _get_theme():
@@ -18,224 +19,184 @@ def _get_colors():
         return Colors.Dark
 
 
+def _t():
+    """Токены оформления текущей темы (src/ui/theme.py)."""
+    return tokens_for(_get_theme())
+
+
 # Элементы списка
+# Подписи под файлом (длительность / дата / голос) — лёгкие «чипы», без рамок-коробок.
 
 def duration_label_style():
-    colors = _get_colors()
+    t = _t()
     return f'''
     QLabel {{
-        background-color: {colors.background_color};
-        padding-left: 5px;
-        padding: 5px;
-        border: 1px solid {colors.blue};
-        border-right: none;
-        border-top-left-radius: 10px;
-        border-bottom-left-radius: 10px;
+        background-color: transparent;
+        color: {t.muted};
+        padding: 2px 0px;
+        border: none;
     }}
 '''
 
 
 def create_date_label_style1():
-    """Если нет плашки с голосом для файла"""
-    colors = _get_colors()
-    return f'''
-                QLabel {{
-                    background-color: {colors.background_color};
-                    padding-left: 5px;
-                    padding: 5px;
-                    border: 1px solid {colors.blue};
-                    border-left: none;
-                    border-top-right-radius: 10px;
-                    border-bottom-right-radius: 10px;
-                }}
-            '''  #
+    """Без плашки с голосом — единый стиль чипа."""
+    return duration_label_style()
 
 
 def create_date_label_style2():
-    """Если есть плашка с голосом для файла"""
-    colors = _get_colors()
-    return f'''
-                QLabel {{
-                    background-color: {colors.background_color};
-                    padding-left: 5px;
-                    padding: 5px;
-                    border-top: 1px solid {colors.blue};
-                    border-bottom: 1px solid {colors.blue};
-                }}
-            '''
+    """С плашкой голоса — тот же чип (рамок-сегментов больше нет)."""
+    return duration_label_style()
 
 
 def voice_label_style():
-    colors = _get_colors()
+    t = _t()
     return f'''
             QLabel {{
-                background-color: {colors.background_color};
-                padding-left: 5px;
-                padding: 5px;
-                border: 1px solid #2979FE;
-                border-top-right-radius: 10px;
-                border-bottom-right-radius: 10px;
-                border-left: none;
+                background-color: transparent;
+                color: {t.accent};
+                padding: 2px 0px;
+                border: none;
+                font-weight: 600;
             }}
         '''
 
 
 def file_list_item_style():
-    return f'''
-        padding:-1px;
-    '''
+    # Облик карточки задаётся общим QSS (QWidget#fileCard) в src/ui/theme.py.
+    return ""
 
 
 def list_widget_item_style():
-    colors = _get_colors()
-    return f'''
-        QTableWidget::item:selected {{
-            border: 4px solid {colors.pressed_red};
-            border-radius: 10px;
-            background-color: {colors.gray};            
-        }}
-        QTableWidget::item {{
-            background-color: {colors.background_color};
-            border-radius: 15px;
+    return '''
+        QTableWidget { background: transparent; border: none; }
+        QTableWidget::item {
+            background-color: transparent;
             padding: 0px;
             margin-bottom: 10px;
-            margin-top: 10px
-        }}
-        QTableWidget::item:hover {{
-             background-color: {colors.hovered_gray};  
-        }}
+        }
+        QTableWidget::item:selected {
+            background-color: transparent;
+        }
     '''
 
 
 def list_widget_header_style():
-    colors = _get_colors()
+    # Плоский заголовок карточки: жирно, без синей рамки-коробки.
+    t = _t()
     return f'''
-            border: 1px solid {colors.blue};
-            border-radius: 8px;
-            padding: 10px;
-            padding-left: 15px;
+            border: none;
+            background: transparent;
+            color: {t.text};
+            padding: 2px 0px;
             font-weight: bold;
         '''
 
 
 def scroll_label_list_item_style():
-    colors = _get_colors()
-    return f'''
-           background-color: {colors.background_color};
-           border-radius: 10px;
-           QLabel {{
-               background-color: {colors.background_color};
-           }}
-           QLabel:hover {{
-               background-color: {colors.background_color};
-               font: italic 14pt 'Tahoma';
-           }}
-        '''  # это элемент внутри элемента главного списка, где расположен текст файла
+    # Область текста файла — прозрачная, сливается с карточкой.
+    return '''
+           background-color: transparent;
+        '''
 
 
 def scroll_label_list_item_text_style():
+    t = _t()
     return f'''
             * {{
-                padding: 5px;
+                background-color: transparent;
+                color: {t.muted};
+                padding: 4px 0px;
                 font: italic 10pt 'Tahoma';
             }}
-                          
            '''
 
-
-# ...
 
 # zones
 
 def zone_list_item_style():
-    colors = _get_colors()
-    return f"""
-               border-radius: 8px;
-               border: 2px solid {colors.background_color};
-            """
+    # Облик карточки зоны задаётся общим QSS (QWidget#zoneCard) в src/ui/theme.py.
+    return ""
 
 
 def spin_box_text_size():
-    return f'''
-    QSpinBox {{ font-size: 26px; }}
-    '''
+    return "QSpinBox { font-size: 18px; }"
 
 
 def volume_slider_style_default():
-    colors = _get_colors()
+    t = _t()
     return f'''
-               QSlider::handle:horizontal {{ background-color: {colors.blue}; }}
+               QSlider::handle:horizontal {{ background-color: white; }}
+               QSlider::sub-page:horizontal {{ background-color: {t.accent}; }}
            '''
 
 
 def volume_slider_style_overload():
-    colors = _get_colors()
+    t = _t()
     return f'''
-               QSlider::handle:horizontal {{ background-color: {colors.red}; }}
+               QSlider::handle:horizontal {{ background-color: white; }}
+               QSlider::sub-page:horizontal {{ background-color: {t.danger}; }}
            '''
 
 
 # кнопки
 
 def blue_color_btn():
-    colors = _get_colors()
+    t = _t()
     return f"""
-             QPushButton {{ 
-                    background-color: {colors.blue}; 
-                    color: #DFE1D7; 
+             QPushButton {{
+                    background-color: {t.accent};
+                    color: white;
+                    border: none;
+                    border-radius: 8px;
                 }}
-             QPushButton:pressed {{ background-color: {colors.pressed_blue}; }}
-             QPushButton:hover {{ background-color: {colors.hovered_blue}; }}
-             QPushButton:selected {{ background-color: {colors.pressed_blue}; }}
-             QPushButton:clicked {{ background-color: {colors.pressed_blue}; }}
-         
+             QPushButton:pressed {{ background-color: {t.accent_p}; }}
+             QPushButton:hover {{ background-color: {t.accent_h}; }}
             """
 
+
 def zone_item_btn():
-    colors = _get_colors()
+    t = _t()
     return f"""
-             QPushButton {{ 
-                    background-color: {colors.background_color}; 
-                    color: #DFE1D7; 
+             QToolButton {{
+                    background-color: transparent;
+                    border: 1px solid transparent;
+                    border-radius: 8px;
                 }}
-             QPushButton:pressed {{ background-color: {colors.pressed_gray}; }}
-             QPushButton:hover {{ background-color: {colors.hovered_blue}; }}
-             QPushButton:clicked {{ background-color: {colors.pressed_blue}; }}
-         
+             QToolButton:hover {{ border-color: {t.accent}; }}
+             QToolButton:pressed, QToolButton:open {{
+                    border: 1px solid transparent;
+                    background-color: {t.elev};
+                }}
             """
 
 
 def stop_realtime_btn_state1():
-    colors = _get_colors()
+    t = _t()
     return f"""
-            QPushButton {{ background-color: {colors.gray};}}
-            QPushButton:hover {{background-color: {colors.hovered_gray};}}
-            QPushButton:pressed {{background-color: {colors.pressed_gray};}} 
+            QPushButton {{ background-color: {t.elev}; border: 1px solid {t.border}; border-radius: 8px; }}
+            QPushButton:hover {{ background-color: {t.border}; }}
+            QPushButton:pressed {{ background-color: {t.accent_p}; }}
             """
 
 
 def stop_realtime_btn_state2():
-    colors = _get_colors()
+    t = _t()
     return f"""
-            background-color: {colors.red};
-            :hover {{background-color: {colors.hovered_red};}}
-            :pressed {{background-color: {colors.pressed_red};}} 
-           """
+            QPushButton {{ background-color: {t.danger}; color: white; border: none; border-radius: 8px; }}
+            QPushButton:hover {{ background-color: {t.danger_h}; }}
+            """
 
 
 def button_style():
+    t = _t()
     return f'''
         QPushButton {{
-            background-color: #333;
-            border-radius: 10px;
-            padding: 5px;
+            background-color: {t.elev};
+            border: 1px solid {t.border};
+            border-radius: 8px;
+            padding: 6px;
         }}
-        QPushButton:hover {{
-            background-color: #666;
-        }}
-        QPushButton:pressed {{
-            background-color: #999;
-        }}
+        QPushButton:hover {{ background-color: {t.border}; }}
+        QPushButton:pressed {{ background-color: {t.accent_p}; }}
     '''
-
-# ...
