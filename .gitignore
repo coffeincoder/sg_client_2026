@@ -28,3 +28,14 @@ app.lock
 build/
 dist/
 # (main.spec — конфиг сборки, ОСТАётся в git; ресурсы res/ и INI/ тоже остаются)
+
+# IDE / статический анализ
+pyrightconfig.json
+.vscode/
+
+# Превью-скрипты и их артефакты (инструменты разработки, не код приложения)
+preview_*.py
+preview_*.png
+
+# CocoIndex Code (ccc — локальный индекс поиска)
+/.cocoindex_code/
