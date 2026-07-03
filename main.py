@@ -214,6 +214,11 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setAcceptDrops(True)
         self.setupUi(self)
 
+        _vfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")
+        if os.path.exists(_vfile):
+            with open(_vfile) as _f:
+                self.setWindowTitle(f"КСБ Саундгард v{_f.read().strip()}")
+
         self.layout_manager = ZoneLayoutManager(self)
 
         self.filelist_tab_widget.currentChanged.connect(self.on_tab_changed)
