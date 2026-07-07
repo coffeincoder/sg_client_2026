@@ -1,0 +1,53 @@
+[
+  {
+    "name": "зона 1 [EMU]",
+    "ip": "127.0.0.1",
+    "isChecked": true,
+    "is_playing": false,
+    "is_streaming": false,
+    "is_sip_running": false,
+    "is_warning": false,
+    "is_online": false,
+    "tooltip_warn_message": "",
+    "tooltip_message": "",
+    "zone_type": "",
+    "subzone1": true,
+    "subzone2": true,
+    "subzone1_name": "1",
+    "subzone2_name": "2"
+  },
+  {
+    "name": "зона 2 [EMU]",
+    "ip": "127.0.0.2",
+    "isChecked": true,
+    "is_playing": false,
+    "is_streaming": false,
+    "is_sip_running": false,
+    "is_warning": false,
+    "is_online": false,
+    "tooltip_warn_message": "",
+    "tooltip_message": "",
+    "zone_type": "",
+    "subzone1": true,
+    "subzone2": false,
+    "subzone1_name": "1",
+    "subzone2_name": "2"
+  },
+  {
+    "name": "зона 3 [BROKEN]",
+    "ip": "127.0.0.3",
+    "isChecked": true,
+    "is_playing": false,
+    "is_streaming": false,
+    "is_sip_running": false,
+    "is_warning": false,
+    "is_online": false,
+    "tooltip_warn_message": "",
+    "tooltip_message": "",
+    "zone_type": "",
+    "subzone1": false,
+    "subzone2": false,
+    "subzone1_name": "1",
+    "subzone2_name": "2"
+  }
+]
