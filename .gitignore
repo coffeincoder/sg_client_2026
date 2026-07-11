@@ -28,3 +28,6 @@ app.lock
 build/
 dist/
 # (main.spec — конфиг сборки, ОСТАётся в git; ресурсы res/ и INI/ тоже остаются)
+
+# qt-testing skill screenshots / рабочая папка
+scratch/
