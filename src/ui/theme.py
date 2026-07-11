@@ -111,7 +111,7 @@ QToolButton::menu-indicator {{ image: none; }}
 /* вкладки */
 QTabWidget::pane {{ border: 1px solid {t.border}; border-radius: 10px; top: -1px; background: {t.card}; }}
 QTabBar {{ margin-left: 8px; }}
-QTabBar::tab {{ background: transparent; color: {t.muted}; padding: 8px 20px; margin-right: 4px;
+QTabBar::tab {{ background: transparent; color: {t.muted}; padding: 8px 24px; margin-right: 4px;
                 border-radius: 8px; font-weight: 600; }}
 QTabBar::tab:selected {{ background: {t.accent}; color: white; }}
 QTabBar::tab:hover:!selected {{ color: {t.text}; }}

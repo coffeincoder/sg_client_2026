@@ -13,7 +13,7 @@ from PyQt5.QtCore import QSize
 from PyQt5.QtWidgets import QSpacerItem, QSlider, QPushButton, QAction, QStatusBar, QProgressBar, QSpinBox, \
     QCheckBox, QGroupBox, QTextEdit, QStackedLayout, QStackedWidget, QTabWidget, QLineEdit
 from PyQt5 import QtCore, QtGui
-from PyQt5.QtGui import QIcon, QPixmap
+from PyQt5.QtGui import QIcon, QPixmap, QFont
 from qtpy import QtWidgets
 
 from paths import img_files
@@ -217,8 +217,13 @@ class Ui_MainWindow(object):
         self.scenarios_layout = QVBoxLayout(self.scenarios_tab)
 
         tab_widget = QtWidgets.QTabWidget(self.central_widget)
+        # Жирный шрифт таб-бару в коде: QSS font-weight:600 не учитывается в ширине
+        # таба, из-за чего жирный текст вылезал и обрезался (у «Сценарии» срезалась «С»).
+        _tab_font = QFont()
+        _tab_font.setBold(True)
+        tab_widget.tabBar().setFont(_tab_font)
         tab_widget.addTab(self.current_files_tab, "Файлы")
-        tab_widget.addTab(self.scenarios_tab, "сценарии")
+        tab_widget.addTab(self.scenarios_tab, "Сценарии")
         return tab_widget
 
     def _build_add_file_panel(self) -> QGroupBox:
