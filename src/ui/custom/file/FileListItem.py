@@ -4,6 +4,7 @@ from PyQt5.QtGui import QFont, QPalette, QColor, QIcon
 
 from paths import sep
 from src.data.FileModel import FileItem
+from src.ui.custom.ElidingLabel import ElidingLabel
 from src.ui.style_sheets import *
 from src.ui.style_sheets import _get_theme
 from src.ui.theme import tokens_for
@@ -75,11 +76,11 @@ class FileListItem(QWidget):
         return btn
 
     def _build_header_label(self) -> QLabel:
-        label = QLabel(self.file_item.header.replace('\n', ' ').replace("_", " "))
+        # ElidingLabel: длинное имя обрезается многоточием (…), полное — в подсказке.
+        # wordWrap не годился — не разбивает длинные слова без пробелов.
+        label = ElidingLabel(self.file_item.header.replace('\n', ' ').replace("_", " "))
         label.setFont(QFont("Arial", 12))
-        label.setAlignment(Qt.AlignLeft | Qt.AlignTop)
-        label.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Preferred)
-        label.setWordWrap(True)
+        label.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
         label.setObjectName("header")
         label.setStyleSheet(list_widget_header_style())
         return label
@@ -113,13 +114,12 @@ class FileListItem(QWidget):
             self.create_date_label.setStyleSheet(create_date_label_style1())
 
     def _assemble_layouts(self) -> None:
+        # Длительность + дата — компактным столбиком справа.
         meta_layout = QVBoxLayout()
         meta_layout.setSpacing(1)
         meta_layout.setContentsMargins(0, 0, 0, 0)
         meta_layout.addWidget(self.duration_label, 0, Qt.AlignRight)
         meta_layout.addWidget(self.create_date_label, 0, Qt.AlignRight)
-        if self.file_item.current_voice is not None:
-            meta_layout.addWidget(self.current_voice_label, 0, Qt.AlignRight)
 
         right_layout = QVBoxLayout()
         right_layout.setSpacing(2)
@@ -128,11 +128,20 @@ class FileListItem(QWidget):
         right_layout.addLayout(meta_layout)
         right_layout.addStretch()
 
-        self.file_item_container = QHBoxLayout()
+        # Верхняя строка: заголовок слева (тянется), справа — шестерёнка/длительность/дата.
+        top_row = QHBoxLayout()
+        top_row.setSpacing(8)
+        top_row.addWidget(self.header_text, 1, Qt.AlignVCenter)
+        top_row.addLayout(right_layout)
+
+        # Плашка голоса — отдельной строкой снизу во всю ширину, чтобы не отъедать
+        # ширину у заголовка (иначе длинный «голос: …» ужимал имя файла).
+        self.file_item_container = QVBoxLayout()
         self.file_item_container.setContentsMargins(12, 8, 8, 8)
-        self.file_item_container.setSpacing(8)
-        self.file_item_container.addWidget(self.header_text, 1, Qt.AlignVCenter)
-        self.file_item_container.addLayout(right_layout)
+        self.file_item_container.setSpacing(4)
+        self.file_item_container.addLayout(top_row)
+        if self.file_item.current_voice is not None:
+            self.file_item_container.addWidget(self.current_voice_label)
         self.setLayout(self.file_item_container)
 
     def set_selected(self, on: bool):
