@@ -90,7 +90,9 @@ class Ui_MainWindow(object):
 
     def setupUi(self, MainWindow):
         MainWindow.setObjectName("MainWindow")
-        MainWindow.setMinimumSize(1000, 640)
+        # Минимум 1300px по ширине: ниже центр начинает схлопываться и кнопки
+        # добавления не влезают. Порог подобран под самую широкую подпись.
+        MainWindow.setMinimumSize(1300, 700)
 
         self.central_widget = QtWidgets.QWidget(MainWindow)
         self.central_widget.setObjectName("centralwidget")
