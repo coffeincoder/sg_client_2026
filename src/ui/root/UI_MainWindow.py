@@ -173,6 +173,7 @@ class Ui_MainWindow(object):
         self.search_input = QLineEdit()
         self.search_input.setPlaceholderText("Поиск файла…")
         self.search_input.setMinimumHeight(40)
+        self.search_input.setMinimumWidth(140)
         self.search_input.setClearButtonEnabled(True)
 
         self.sort_by_name_btn = QtWidgets.QPushButton(" По имени")
@@ -335,9 +336,11 @@ class Ui_MainWindow(object):
         return layout
 
     def _assemble_main_layout(self, MainWindow) -> None:
-        # Левая панель — фиксированная ширина как в preview_real
+        # Левая панель — гибкая ширина: сжимается на узком окне, не разрастается на широком.
+        # (Раньше был setFixedWidth(260) — при окне ~1000px левая+правая съедали центр.)
         left_widget = QtWidgets.QWidget()
-        left_widget.setFixedWidth(260)
+        left_widget.setMinimumWidth(210)
+        left_widget.setMaximumWidth(280)
         self.left_vertical_layout = QtWidgets.QVBoxLayout(left_widget)
         self.left_vertical_layout.setContentsMargins(0, 0, 0, 0)
         self.left_vertical_layout.setSpacing(12)
@@ -357,9 +360,10 @@ class Ui_MainWindow(object):
         self.center_vertical_layout.setContentsMargins(0, 0, 0, 0)
         self.center_vertical_layout.addLayout(filelist_container_layout)
 
-        # Правая панель — фиксированная ширина
+        # Правая панель — гибкая ширина (была setFixedWidth(300)).
         right_widget = QtWidgets.QWidget()
-        right_widget.setFixedWidth(300)
+        right_widget.setMinimumWidth(230)
+        right_widget.setMaximumWidth(320)
         self.right_vertical_layout = QtWidgets.QVBoxLayout(right_widget)
         self.right_vertical_layout.setContentsMargins(0, 0, 0, 0)
         self.right_vertical_layout.addLayout(self.zone_list_container)
