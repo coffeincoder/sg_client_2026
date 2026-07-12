@@ -200,7 +200,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Устанавливаем размеры окна равными размерам экрана
         self.setGeometry(0, 0, width, height)
-        self.sheduler = Scheduler(paths.shedule_data_scenaries, self.on_task_executed)
+        self.sheduler = Scheduler(paths.shedule_data_scenaries, self.vm.scenarios.on_task_executed)
         self.sheduler.start()
 
         # Set up file monitoring
@@ -223,32 +223,6 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                     self.yandex_things(data)
                 print(data_list)
 
-    def on_modified(self, event):
-        print(f"Событие изменения файла: {event.src_path}")
-        if event.src_path.endswith(".json"):
-            print(f"Изменен файл: {event.src_path}. Перезапуск планировщика.")
-            self.sheduler.stop()  # Остановить текущий планировщик
-            self.sheduler.wait()  # Подождать завершения потока
-
-            self.sheduler.load_schedules()  # Перезагрузить расписания
-            if not self.sheduler.isRunning():  # Проверка, что поток не запущен
-                print("Запуск нового планировщика.")
-                self.sheduler.start()  # Запустить новый планировщик
-            else:
-                print("Планировщик уже запущен.")
-    import json
-    def on_task_executed(self, s_name, filename):
-        # Создание окна сообщения
-
-        sleep(1)
-        #scenario_name = self.layout_manager.main_window.scenario_listwidget.currentItem().text()
-        print(s_name)
-        print('11111111111111111111111111111111111111')
-        asyncio.run(self.orange_play_scenario(scenario_name=s_name))
-        print('22222222222222222222222222222222222222')
-        sleep(1)
-        # Отображение окна сообщения
-
     def closeEvent(self, event):
         if self.lock_manager:
             self.lock_manager.stop()
@@ -259,44 +233,11 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.zone_list_widget.save_zones()
         event.accept()
-    def load_scenarios(self):
-        try:
-            with open(paths.scenario, 'r', encoding='utf-8') as f:
-                all_scenarios = json.load(f)
-        except FileNotFoundError:
-            return {}
 
-        scenarios = {}
+    # --- Scenarios thin proxies (Task 5) ---
 
-        for scenario_name, scenario_data in all_scenarios.items():
-            scenario_items = []
-
-            for item in scenario_data["ScenarioItems"]:
-                # Восстанавливаем объект Orange (зону)
-                zone_data = item.get("zone_data")
-                zone_obj = Orange(**zone_data) if zone_data else None
-
-                # Восстанавливаем объект FileItem (файл)
-                file_data = item.get("file_data")
-                file_obj = FileItem.from_json(file_data) if file_data else None
-
-                # Создаем объект сценария (предполагается, что у вас есть соответствующий класс)
-                scenario_item = ScenarioItem(
-                    zone=zone_obj,
-                    file=file_obj
-                )
-
-                scenario_items.append(scenario_item)
-
-            # Создаем объект ScenarioModel (или другой соответствующий класс)
-            scenario = ScenarioModel(
-                scenarioName=scenario_name,
-                ScenarioItems=scenario_items
-            )
-
-            scenarios[scenario_name] = scenario
-
-        return scenarios
+    def load_scenarios(self, *a, **k):
+        return self.vm.scenarios.load_scenarios(*a, **k)
 
 
     def on_tab_changed(self, index):

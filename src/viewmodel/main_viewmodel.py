@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QObject
 
 from src.viewmodel.files_viewmodel import FilesViewModel
+from src.viewmodel.scenarios_viewmodel import ScenariosViewModel
 
 
 class MainViewModel(QObject):
@@ -10,6 +11,7 @@ class MainViewModel(QObject):
         super().__init__()
         self.view = view
         self.files = FilesViewModel(view)
+        self.scenarios = ScenariosViewModel(view)
         # фич-VM подключаются здесь в Фазе 2:
         # self.zones = ZonesViewModel(view)
         # ...
