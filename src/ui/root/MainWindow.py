@@ -78,6 +78,7 @@ from src.utils.app_helpers import (
     last_five_chars_of_datetime_timestamp, settings, mic_is_ready,
     set_light_theme, set_dark_theme,
 )
+from src.viewmodel.main_viewmodel import MainViewModel
 
 logger = setup_logger()
 
@@ -205,6 +206,9 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.observer = Observer()
         self.observer.schedule(self.event_handler, paths.shedule_data_scenaries, recursive=False)
         self.observer.start()
+
+        # Wire up ViewModel
+        self.vm = MainViewModel(self)
 
         print(self.file_list_widget.rowCount())
         if self.file_list_widget.rowCount() == 0:
