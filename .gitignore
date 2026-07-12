@@ -39,3 +39,6 @@ preview_*.png
 
 # CocoIndex Code (ccc — локальный индекс поиска)
 /.cocoindex_code/
+
+# qt-testing skill screenshots / рабочая папка
+scratch/

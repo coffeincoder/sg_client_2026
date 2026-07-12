@@ -27,7 +27,6 @@ class ZoneListItem(QWidget):
     def __init__(self, zone: Orange):
         super().__init__()
         self.zone = zone
-        self.setMinimumHeight(140)
         self.initUI()
 
     def initUI(self):
@@ -109,12 +108,12 @@ class ZoneListItem(QWidget):
         self.subzone1_checkbox.stateChanged.connect(self.update_subzone1_state)
         self.subzone2_checkbox.stateChanged.connect(self.update_subzone2_state)
 
-        layout = QVBoxLayout()
+        layout = QHBoxLayout()
         layout.addWidget(self.subzone1_checkbox)
         layout.addWidget(self.subzone2_checkbox)
         layout.addStretch()
-        layout.setSpacing(5)
-        layout.setContentsMargins(10, 5, 5, 5)
+        layout.setSpacing(10)
+        layout.setContentsMargins(10, 2, 5, 2)
 
         container = QWidget()
         container.setLayout(layout)
@@ -141,15 +140,16 @@ class ZoneListItem(QWidget):
         zone_info_layout.addWidget(self.online_status_label)
 
         left_layout = QVBoxLayout()
-        left_layout.addWidget(self.checkbox, 1)
-        left_layout.addWidget(self.status_indicator, 1)
-        left_layout.setSpacing(10)
+        left_layout.addWidget(self.checkbox, 0, Qt.AlignHCenter)
+        left_layout.addWidget(self.status_indicator, 0, Qt.AlignHCenter)
+        left_layout.setSpacing(4)
+        left_layout.addStretch()
 
         center_layout = QVBoxLayout()
         center_layout.addWidget(self.zone_name_label)
         center_layout.addLayout(zone_info_layout)
         center_layout.addWidget(self.subzones_container)
-        center_layout.setSpacing(8)
+        center_layout.setSpacing(4)
 
         right_layout = QVBoxLayout()
         right_layout.addWidget(self.menu_button)
@@ -160,8 +160,8 @@ class ZoneListItem(QWidget):
         zone_container.addLayout(left_layout, 1)
         zone_container.addLayout(center_layout, 12)
         zone_container.addLayout(right_layout, 1)
-        zone_container.setContentsMargins(14, 12, 14, 12)
-        zone_container.setSpacing(12)
+        zone_container.setContentsMargins(10, 8, 10, 8)
+        zone_container.setSpacing(8)
 
         self.setLayout(zone_container)
 

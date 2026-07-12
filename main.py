@@ -29,6 +29,11 @@ from qtpy import QtWidgets
 from rtp import RTP, PayloadType
 from watchdog.observers import Observer
 
+try:
+    os.chdir(os.path.dirname(os.path.abspath(__file__)))
+except NameError:
+    pass  # exec-контекст (напр. PyCharm console) — CWD уже должен быть корнем проекта
+
 import paths
 
 from paths import *
@@ -214,7 +219,11 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setAcceptDrops(True)
         self.setupUi(self)
 
-        _vfile = os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")
+        try:
+            _script_dir = os.path.dirname(os.path.abspath(__file__))
+        except NameError:
+            _script_dir = os.getcwd()
+        _vfile = os.path.join(_script_dir, "VERSION")
         if os.path.exists(_vfile):
             with open(_vfile) as _f:
                 self.setWindowTitle(f"КСБ Саундгард v{_f.read().strip()}")
@@ -258,6 +267,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.repeat_check_box.clicked.connect(self.change_enabled_of_spin_box)
         self.sort_by_name_btn.clicked.connect(self.sort_by_name)
         self.sort_by_date_btn.clicked.connect(self.sort_by_date)
+        self.search_input.textChanged.connect(self.on_search_changed)
         self.upload_custom_file_btn.clicked.connect(self.upload_custom_file)
 
         self.record_btn.clicked.connect(self.launch_rec)
@@ -1224,14 +1234,9 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def sort_by_name(self):
         self.sort_key = 'header'
-        if self.sort_by_name_btn.text() == "А-Я":
-            self.name_reverse_key = False
-            self.sort_by_name_btn.setText("Я-А")
-            self.sort_by_name_btn.setIcon(QIcon(f"{paths.img_files}/sort1.png"))
-        elif self.sort_by_name_btn.text() == "Я-А":
-            self.name_reverse_key = True
-            self.sort_by_name_btn.setText("А-Я")
-            self.sort_by_name_btn.setIcon(QIcon(f"{paths.img_files}/sort2.png"))
+        self.name_reverse_key = not self.name_reverse_key
+        icon = "sort2.png" if self.name_reverse_key else "sort1.png"
+        self.sort_by_name_btn.setIcon(QIcon(f"{paths.img_files}/{icon}"))
         self.FILE_LIST = self.files_repo.sort_list(self.sort_key, self.name_reverse_key)
         self.update_file_list()
 
@@ -1245,6 +1250,14 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.FILE_LIST = self.files_repo.sort_list(self.sort_key, self.date_reverse_key)
         self.update_file_list()
+
+    def on_search_changed(self, text: str):
+        if not text:
+            self.file_list_widget.update_file_list(self.FILE_LIST, self.grid_size)
+        else:
+            q = text.lower()
+            filtered = [f for f in self.FILE_LIST if q in f.header.lower()]
+            self.file_list_widget.update_file_list(filtered, self.grid_size)
 
     def play_file_local(self, file_item: FileItem):
         full_path_mp3_folder = os.path.join(os.getcwd(), mp3_files)
@@ -1536,11 +1549,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         with open(paths.settings) as s:
             app_theme = json.load(s)["theme"]
 
-        if app_theme == "light":
-            self.app.setStyleSheet(qdarkstyle._load_stylesheet("pyqt5", qdarkstyle.LightPalette))
-
-        elif app_theme == "dark":
-            self.app.setStyleSheet(qdarkstyle._load_stylesheet("pyqt5", qdarkstyle.DarkPalette))
+        from src.ui.theme import app_stylesheet
+        self.app.setStyleSheet(app_stylesheet(app_theme))
 
         # Обновление интерфейса
         self.update_list_on_slider(self.grid_size)

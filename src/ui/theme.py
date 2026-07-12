@@ -66,6 +66,23 @@ QMainWindow, QWidget#root {{ background: {t.bg}; }}
 
 /* карточки */
 QFrame#card {{ background: {t.card}; border: 1px solid {t.border}; border-radius: 12px; }}
+QGroupBox {{
+    background-color: {t.card};
+    border: 1px solid {t.border};
+    border-radius: 10px;
+    margin-top: 18px;
+}}
+QGroupBox::title {{
+    subcontrol-origin: margin;
+    subcontrol-position: top left;
+    left: 12px;
+    padding: 2px 6px;
+    background-color: {t.card};
+    color: {t.muted};
+    font-size: 11px;
+    font-weight: 600;
+    border-radius: 4px;
+}}
 QLabel#sectionTitle {{ color: {t.muted}; font-size: 11px; font-weight: 600; letter-spacing: 1px; }}
 QLabel#panelTitle {{ font-size: 15px; font-weight: 600; }}
 QLabel#muted {{ color: {t.muted}; }}
@@ -93,7 +110,8 @@ QToolButton::menu-indicator {{ image: none; }}
 
 /* вкладки */
 QTabWidget::pane {{ border: 1px solid {t.border}; border-radius: 10px; top: -1px; background: {t.card}; }}
-QTabBar::tab {{ background: transparent; color: {t.muted}; padding: 8px 20px; margin-right: 4px;
+QTabBar {{ margin-left: 8px; }}
+QTabBar::tab {{ background: transparent; color: {t.muted}; padding: 8px 24px; margin-right: 4px;
                 border-radius: 8px; font-weight: 600; }}
 QTabBar::tab:selected {{ background: {t.accent}; color: white; }}
 QTabBar::tab:hover:!selected {{ color: {t.text}; }}
