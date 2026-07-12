@@ -94,10 +94,10 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         try:
-            _script_dir = os.path.dirname(os.path.abspath(__file__))
+            _root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
         except NameError:
-            _script_dir = os.getcwd()
-        _vfile = os.path.join(_script_dir, "VERSION")
+            _root_dir = os.getcwd()
+        _vfile = os.path.join(_root_dir, "VERSION")
         if os.path.exists(_vfile):
             with open(_vfile) as _f:
                 self.setWindowTitle(f"КСБ Саундгард v{_f.read().strip()}")
