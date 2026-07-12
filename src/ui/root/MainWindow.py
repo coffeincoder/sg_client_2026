@@ -116,9 +116,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.app = application
 
         self.is_streaming_flag = False
-        self.sort_key = 'create_date'
-        self.name_reverse_key = True
-        self.date_reverse_key = True
+        # sort_key / name_reverse_key / date_reverse_key переехали в FilesViewModel
         self.indication = None
         self.indication_mic = None
         self.recorder = None
@@ -131,6 +129,9 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         addr_for_status_collector = "http://192.168.252.164:9111/api.php" # - debug
         self.status_sender = StatusSender(addr_for_status_collector)
 
+        # Wire up ViewModel BEFORE signal connects so self.vm.files is available
+        self.vm = MainViewModel(self)
+
         self.play_btn.clicked.connect(self.launch_play)
         self.stop_btn.clicked.connect(self.launch_stop)
         self.text_to_file_btn.clicked.connect(self.launch_yandex_process)
@@ -140,23 +141,24 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.zone_refresh_btn.clicked.connect(self.launch_status_connection)
 
         self.repeat_check_box.clicked.connect(self.change_enabled_of_spin_box)
-        self.sort_by_name_btn.clicked.connect(self.sort_by_name)
-        self.sort_by_date_btn.clicked.connect(self.sort_by_date)
-        self.search_input.textChanged.connect(self.on_search_changed)
-        self.upload_custom_file_btn.clicked.connect(self.upload_custom_file)
+        # Files signals → FilesViewModel
+        self.sort_by_name_btn.clicked.connect(self.vm.files.sort_by_name)
+        self.sort_by_date_btn.clicked.connect(self.vm.files.sort_by_date)
+        self.search_input.textChanged.connect(self.vm.files.on_search_changed)
+        self.upload_custom_file_btn.clicked.connect(self.vm.files.upload_custom_file)
 
         self.record_btn.clicked.connect(self.launch_rec)
         self.volume_slider.valueChanged.connect(self.set_volume)
         self.update_volume_on_oranges_btn.clicked.connect(self.send_new_volume_value)
-        self.list_scale_slider.valueChanged.connect(self.update_list_on_slider)
+        self.list_scale_slider.valueChanged.connect(self.vm.files.update_list_on_slider)
         self.voice_select_btn.clicked.connect(self.select_voice_menu)
         self.realtime_button.clicked.connect(self.launch_realtime)
         self.stop_realtime_button.clicked.connect(self.orange_stop_realtime)
 
-        self.file_list_widget.delete_clicked.connect(self.delete_file)
-        self.file_list_widget.listen_clicked.connect(self.play_file_local)
-        self.file_list_widget.rename_clicked.connect(self.rename_file)
-        self.file_list_widget.add_description_clicked.connect(self.add_description_to_file_item)
+        self.file_list_widget.delete_clicked.connect(self.vm.files.delete_file)
+        self.file_list_widget.listen_clicked.connect(self.vm.files.play_file_local)
+        self.file_list_widget.rename_clicked.connect(self.vm.files.rename_file)
+        self.file_list_widget.add_description_clicked.connect(self.vm.files.add_description_to_file_item)
 
         self.zone_list_widget.rename_clicked.connect(self.rename_zone)
         self.zone_list_widget.delete_clicked.connect(self.remove_zone)
@@ -206,9 +208,6 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.observer = Observer()
         self.observer.schedule(self.event_handler, paths.shedule_data_scenaries, recursive=False)
         self.observer.start()
-
-        # Wire up ViewModel
-        self.vm = MainViewModel(self)
 
         print(self.file_list_widget.rowCount())
         if self.file_list_widget.rowCount() == 0:
@@ -1092,151 +1091,50 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """mqtt"""
         self.update_zones(status)
 
-    def update_list_on_slider(self, val):
-        self.grid_size = val
-        self.update_file_list()
-        logger.info(f"main: update_file_list_on_slider: {self.grid_size}")
-        with open(grid, 'w') as f:
-            f.write(str(val))
+    # ------------------------------------------------------------------
+    # Files feature — thin View proxies delegating to FilesViewModel.
+    # These proxies exist because the methods are called from non-Files
+    # code that stays on the View (apply_theme, dropEvent, on_ya_response,
+    # orange_play, on_ffmpeg_finished, yandex_things in __init__ block).
+    # ------------------------------------------------------------------
 
-    def update_file_list(self, new_list: List[FileItem] = None):
-        self.progress_indicator.stopIndicate()
-        logger.info(f"main: update_file_list: {self.FILE_LIST}")
+    def update_list_on_slider(self, val, *args, **kwargs):
+        return self.vm.files.update_list_on_slider(val, *args, **kwargs)
 
-        if new_list:
-            self.file_list_widget.update_file_list(new_list, self.grid_size)
-        else:
-            self.FILE_LIST = self.files_repo.file_list
-            self.file_list_widget.update_file_list(self.FILE_LIST, self.grid_size)
+    def update_file_list(self, *args, **kwargs):
+        return self.vm.files.update_file_list(*args, **kwargs)
 
-    def sort_by_name(self):
-        self.sort_key = 'header'
-        self.name_reverse_key = not self.name_reverse_key
-        icon = "sort2.png" if self.name_reverse_key else "sort1.png"
-        self.sort_by_name_btn.setIcon(QIcon(f"{paths.img_files}/{icon}"))
-        self.FILE_LIST = self.files_repo.sort_list(self.sort_key, self.name_reverse_key)
-        self.update_file_list()
+    def add_file_item(self, *args, **kwargs):
+        return self.vm.files.add_file_item(*args, **kwargs)
 
-    def sort_by_date(self):
-        self.sort_key = 'create_date'
-        self.date_reverse_key = not self.date_reverse_key
-        if self.date_reverse_key:
-            self.sort_by_date_btn.setIcon(QIcon(f"{paths.img_files}/sort1.png"))
-        else:
-            self.sort_by_date_btn.setIcon(QIcon(f"{paths.img_files}/sort2.png"))
+    def get_file_item_file_name(self, *args, **kwargs):
+        return self.vm.files.get_file_item_file_name(*args, **kwargs)
 
-        self.FILE_LIST = self.files_repo.sort_list(self.sort_key, self.date_reverse_key)
-        self.update_file_list()
+    # These are also proxied to keep them callable via self.<method> from
+    # any remaining internal code; signals already connect to vm.files directly.
+    def sort_by_name(self, *args, **kwargs):
+        return self.vm.files.sort_by_name(*args, **kwargs)
 
-    def on_search_changed(self, text: str):
-        if not text:
-            self.file_list_widget.update_file_list(self.FILE_LIST, self.grid_size)
-        else:
-            q = text.lower()
-            filtered = [f for f in self.FILE_LIST if q in f.header.lower()]
-            self.file_list_widget.update_file_list(filtered, self.grid_size)
+    def sort_by_date(self, *args, **kwargs):
+        return self.vm.files.sort_by_date(*args, **kwargs)
 
-    def play_file_local(self, file_item: FileItem):
-        full_path_mp3_folder = os.path.join(os.getcwd(), mp3_files)
-        full_path_to_mp3_file = os.path.join(full_path_mp3_folder, file_item.filename)
-        logger.info(f"main: play_file_local {full_path_to_mp3_file}")
+    def on_search_changed(self, *args, **kwargs):
+        return self.vm.files.on_search_changed(*args, **kwargs)
 
-        if platform.system() == 'Windows':
-            command = f"start wmplayer \"{full_path_to_mp3_file}\""
-            os.system(command)
-        else:
-            # Экранируем специальные символы в имени файла
-            escaped_path = shlex.quote(full_path_to_mp3_file)
-            # Запускаем в фоновом режиме с помощью nohup и &
-            command = f'nohup mplayer {escaped_path} > /dev/null 2>&1 &'
-            subprocess.Popen(command, shell=True, close_fds=True)
+    def play_file_local(self, *args, **kwargs):
+        return self.vm.files.play_file_local(*args, **kwargs)
 
-    def delete_file(self, file_item: FileItem):
+    def delete_file(self, *args, **kwargs):
+        return self.vm.files.delete_file(*args, **kwargs)
 
-        logger.info(f"main: delete_file: {file_item}")
-        self.FILE_LIST.remove(file_item)
-        self.files_repo.remove_file(file_item)
-        self.update_file_list(self.FILE_LIST)
+    def rename_file(self, *args, **kwargs):
+        return self.vm.files.rename_file(*args, **kwargs)
 
-    def rename_file(self, file_item: FileItem):
-        for file in self.FILE_LIST:
-            if file_item.filename == file.filename:
-                dialog = Rename_Dialog(file_item.header)
-                if dialog.exec() == QDialog.Accepted:
-                    file.header = dialog.get_text()
-                    self.files_repo.save()
+    def add_description_to_file_item(self, *args, **kwargs):
+        return self.vm.files.add_description_to_file_item(*args, **kwargs)
 
-        self.update_file_list()
-
-    def add_description_to_file_item(self, file_item: FileItem):
-        for file in self.FILE_LIST:
-            if file_item == file:
-                dialog = AddDescriptionDialog(file_item)
-                if dialog.exec() == QDialog.Accepted:
-                    file.text = dialog.get_text()
-                    self.files_repo.save()
-                self.update_file_list()
-
-    def add_file_item(self, header, filename, text, current_voice):
-
-        full_path_mp3_folder = os.path.join(os.getcwd(), mp3_files)
-        full_path_to_mp3_file = os.path.join(full_path_mp3_folder, filename)
-        audio = MP3(full_path_to_mp3_file)
-        duration = audio.info.length
-        create_time = get_creation_date(full_path_to_mp3_file)
-
-        self.files_repo.add_file(
-            FileItem(
-                header=header,
-                filename=filename,
-                text=text,
-                duration=round(duration),
-                create_date=create_time,
-                current_voice=current_voice
-            )
-        )
-
-        self.update_file_list()
-
-    def upload_custom_file(self):
-        options = QFileDialog.Options()
-        # options = QFileDialog.DontUseNativeDialog  # Не использовать нативный диалог на macOS
-
-        if platform.system() == 'Windows':
-            download_dir = os.path.join(os.path.expanduser("~"), "Downloads")
-        else:
-            download_dir = os.path.join(os.path.expanduser("~"), "Загрузки")
-
-        # Отображение диалогового окна для выбора файла
-        file_path, _ = QFileDialog.getOpenFileName(self, "Выбрать файл", download_dir,
-                                                   "MP3 files (*.mp3);",
-                                                   options=options)
-        if file_path:
-            logger.info("upload_custom_file: Выбранный файл:", file_path)
-            new_file_path = os.path.join(paths.mp3_files, os.path.basename(file_path))
-            shutil.copy(file_path, new_file_path)
-            audio = MP3(new_file_path)
-            length = audio.info.length
-            create_time = get_creation_date(new_file_path)
-            new_file_item = FileItem(
-                header=os.path.basename(new_file_path),
-                filename=os.path.basename(new_file_path),
-                text=f"Пользовательский файл из {file_path}",
-                duration=round(length),
-                create_date=create_time,
-            )
-            self.files_repo.add_file(new_file_item)
-            # self.FILE_LIST.insert(0, new_file_item)
-        self.update_file_list()
-
-    def get_file_item_file_name(self) -> str:
-        try:
-            widget = self.file_list_widget.get_selected_file_item_widget()
-            widget_file_name = widget.file_item.filename
-            logger.info(widget_file_name)
-            return widget_file_name
-        except Exception as e:
-            logger.info(e)
+    def upload_custom_file(self, *args, **kwargs):
+        return self.vm.files.upload_custom_file(*args, **kwargs)
 
     @pyqtSlot(int)
     def progress_update(self, progress):
