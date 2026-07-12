@@ -69,3 +69,19 @@ def mic_is_ready():
     except Exception as e:
         logger.info(f"Ошибка: {e}")
         return False
+
+
+def set_light_theme():
+    with open(paths.settings, 'r') as s:
+        settings_dict = json.load(s)
+    settings_dict["theme"] = "light"
+    with open(paths.settings, 'w') as s:
+        json.dump(settings_dict, s)
+
+
+def set_dark_theme():
+    with open(paths.settings, 'r') as s:
+        settings_dict = json.load(s)
+    settings_dict["theme"] = "dark"
+    with open(paths.settings, 'w') as s:
+        json.dump(settings_dict, s)
