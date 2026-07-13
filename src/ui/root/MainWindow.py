@@ -409,7 +409,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
                 t.status.connect(self.tcp_orange_callback_status)
-                t.signal_progress_bar.connect(self.progress_update)
+                t.signal_progress_bar.connect(self.vm.tts.progress_update)
                 t.success_rtp_signal.connect(self.on_orange_success)
                 t.final_signal.connect(self.on_orange_finished)
                 t.online_check.connect(self.vm.zones.update_online_status)
@@ -480,7 +480,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
                 t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
                 t.status.connect(self.tcp_orange_callback_status)
-                t.signal_progress_bar.connect(self.progress_update)
+                t.signal_progress_bar.connect(self.vm.tts.progress_update)
                 t.success_rtp_signal.connect(self.on_orange_success)
                 t.final_signal.connect(self.on_orange_finished)
                 t.online_check.connect(self.vm.zones.update_online_status)

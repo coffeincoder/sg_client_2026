@@ -150,7 +150,7 @@ class TtsViewModel(QObject):
         voice3.triggered.connect(lambda: self.set_voice_params('мужской нейтральный'))
         voice4.triggered.connect(lambda: self.set_voice_params('женский нейтральный'))
 
-        button = self.view.sender()
+        button = self.sender()
         menu.exec_(button.mapToGlobal(button.rect().bottomLeft()))
 
     def set_voice_params(self, voice):
