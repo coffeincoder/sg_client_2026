@@ -135,10 +135,10 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.play_btn.clicked.connect(self.launch_play)
         self.stop_btn.clicked.connect(self.launch_stop)
         self.text_to_file_btn.clicked.connect(self.launch_yandex_process)
-        self.zone_add_btn.clicked.connect(self.add_zone)
+        self.zone_add_btn.clicked.connect(self.vm.zones.add_zone)
 
-        self.auto_search_zones_btn.clicked.connect(self.auto_search_zones)
-        self.zone_refresh_btn.clicked.connect(self.launch_status_connection)
+        self.auto_search_zones_btn.clicked.connect(self.vm.zones.auto_search_zones)
+        self.zone_refresh_btn.clicked.connect(self.vm.zones.launch_status_connection)
 
         self.repeat_check_box.clicked.connect(self.change_enabled_of_spin_box)
         # Files signals → FilesViewModel
@@ -160,8 +160,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.file_list_widget.rename_clicked.connect(self.vm.files.rename_file)
         self.file_list_widget.add_description_clicked.connect(self.vm.files.add_description_to_file_item)
 
-        self.zone_list_widget.rename_clicked.connect(self.rename_zone)
-        self.zone_list_widget.delete_clicked.connect(self.remove_zone)
+        self.zone_list_widget.rename_clicked.connect(self.vm.zones.rename_zone)
+        self.zone_list_widget.delete_clicked.connect(self.vm.zones.remove_zone)
 
         self.waveform_viewer = VolumeVisualiser()
 
@@ -178,10 +178,10 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.ZONE_LIST = self.zones_repo.all_zones
 
         self.status_api = StatusAPI(port=1883, topic="sg/statuses")
-        self.status_api.status_changed.connect(self.orange_status_receiver)
+        self.status_api.status_changed.connect(self.vm.zones.orange_status_receiver)
 
         self.connection_thread = ConnectionThread(self.status_api, self.ZONE_LIST)
-        self.connection_thread.connected.connect(self.on_connected)
+        self.connection_thread.connected.connect(self.vm.zones.on_connected)
 
         with open(paths.grid) as f:
             self.grid_size = int(f.read())
@@ -189,7 +189,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.update_zones()
         self.update_list_on_slider(self.grid_size)
         self.system_checker: SystemChecker = SystemChecker(
-            callback=self.update_statuses,
+            callback=self.vm.zones.update_statuses,
             check_interval=settings()["check_interval"]
         )
         self.init_menu_bar()
@@ -285,48 +285,29 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # # Вывод списка заголовков
         # print(headers)
 
-    def launch_system_checker(self):
-        if not self.system_checker.isRunning():
-            self.system_checker.start()
+    # ------------------------------------------------------------------
+    # Zones feature — thin View proxies delegating to ZonesViewModel.
+    # launch_system_checker / launch_status_connection: called from main().
+    # update_zones: called from __init__ and apply_theme.
+    # update_online_status: connected as signal in commit_orange_command.
+    # update_statuses: used as callback in SystemChecker constructor.
+    # add_zone_from_file: called from dropEvent.
+    # ------------------------------------------------------------------
 
-    def launch_status_connection(self):
-        self.zone_refresh_btn.setEnabled(False)
-        self.zone_process_indicator.setVisible(True)
-        self.zone_process_indicator.indicate()
-        if not self.connection_thread.isRunning():
-            logger.info(f"main: launch_status_connection")
-            self.connection_thread.start()
+    def launch_system_checker(self, *a, **k):
+        return self.vm.zones.launch_system_checker(*a, **k)
 
-    @pyqtSlot(bool, str)
-    def update_online_status(self, is_online: bool, ip: str):
-        for zone in self.ZONE_LIST:
-            if ip == zone.ip:
-                zone.is_online = is_online
-        self.update_zones()
+    def launch_status_connection(self, *a, **k):
+        return self.vm.zones.launch_status_connection(*a, **k)
 
-    def update_statuses(self):
-        self.commit_orange_command(command="status", thread_list=self.play_threads)
-        for zone in self.ZONE_LIST:
-            zone.is_online = self.status_api.is_online(zone.ip)
-            logger.info(f"main: on_connected {zone.name} - {zone.is_online}")
-        # self.update_zones()
-        if not self.status_sender.isRunning():
-            self.status_sender.start()
-        self.zone_refresh_btn.setEnabled(True)
-        self.zone_process_indicator.setVisible(False)
-        self.zone_process_indicator.stopIndicate()
+    def update_online_status(self, *a, **k):
+        return self.vm.zones.update_online_status(*a, **k)
 
-    def on_connected(self):
-        logger.info(f"main: on_connected")
-        self.commit_orange_command(command="status", thread_list=self.play_threads)
-        for zone in self.ZONE_LIST:
-            logger.info(f"main: on_connected {zone.name} - {zone.is_online}")
-            self.status_api.is_online(zone.ip)
-        # self.update_zones()
-        self.zone_refresh_btn.setEnabled(True)
-        self.zone_process_indicator.setVisible(False)
-        self.zone_process_indicator.stopIndicate()
-        logger.info(f"main: on_connected self.connection_thread.isRunning() - {self.connection_thread.isRunning()}")
+    def update_statuses(self, *a, **k):
+        return self.vm.zones.update_statuses(*a, **k)
+
+    def on_connected(self, *a, **k):
+        return self.vm.zones.on_connected(*a, **k)
 
     def send_new_volume_value(self):
         self.commit_orange_command("vol", self.play_threads, vol=self.volume_slider.value())
@@ -435,7 +416,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 t.signal_progress_bar.connect(self.progress_update)
                 t.success_rtp_signal.connect(self.on_orange_success)
                 t.final_signal.connect(self.on_orange_finished)
-                t.online_check.connect(self.update_online_status)
+                t.online_check.connect(self.vm.zones.update_online_status)
                 thread_list.append(t)
                 logger.info(
                     f"commit_command({command}): список потоков для команды ({len(thread_list)}) : {thread_list}")
@@ -506,7 +487,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                 t.signal_progress_bar.connect(self.progress_update)
                 t.success_rtp_signal.connect(self.on_orange_success)
                 t.final_signal.connect(self.on_orange_finished)
-                t.online_check.connect(self.update_online_status)
+                t.online_check.connect(self.vm.zones.update_online_status)
                 thread_list.append(t)
                 logger.info(
                     f"commit_command({command}): список потоков для команды ({len(thread_list)}) : {thread_list}")
@@ -919,118 +900,34 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
             self.repeat_spin_box.setEnabled(False)
             self.repeat_label.setEnabled(False)
 
-    def auto_search_zones(self):
-        self.progressBar.setRange(0, 0)
-        self.app.processEvents()
-        result = subprocess.run(['bash', 'src/SCAN.sh'], stdout=subprocess.PIPE)
-        output = result.stdout.decode()
-        lines = output.splitlines()
+    def auto_search_zones(self, *a, **k):
+        return self.vm.zones.auto_search_zones(*a, **k)
 
-        for line in lines:
-            new_zone = Orange(
-                ip=line,
-                name=f"зона оповещения {line}",
-                isChecked=True
-            )
-            self.zones_repo.add_zone(new_zone)
+    def rename_zone(self, *a, **k):
+        return self.vm.zones.rename_zone(*a, **k)
 
-        self.progressBar.setRange(0, 100)
-        self.progressBar.setValue(0)
-        self.app.processEvents()
-        self.update_zones()
+    def add_zone_from_file(self, *a, **k):
+        return self.vm.zones.add_zone_from_file(*a, **k)
 
-    def rename_zone(self, selected_zone: Orange):
-        # selected_zone = self.zone_list_widget.get_current_zone()
-        if selected_zone is not None:
+    def add_zone(self, *a, **k):
+        return self.vm.zones.add_zone(*a, **k)
 
-            for zone in self.ZONE_LIST:
-                if selected_zone.name == zone.name:
-                    addZoneDialog = UI_AddZoneWindow(zone.name, zone.ip, self.ZONE_LIST, True)
-                    if addZoneDialog.exec() == QDialog.Accepted:
-                        zone.name = addZoneDialog.get_name_field().text()
-                        zone.ip = addZoneDialog.get_ip_field().text()
-
-            self.zones_repo.save(self.ZONE_LIST)
-
-        self.update_zones()
-
-    def add_zone_from_file(self, file_path):
-        # Загрузка данных из файла
-        self.zones_repo.add_zone_from_file(file_path)
-
-        self.update_zones()
-        sleep(0.1)
-
-    def add_zone(self):
-        addZoneDialog = UI_AddZoneWindow(f'зона {len(self.ZONE_LIST) + 1}', '192.168', self.ZONE_LIST)
-
-        if addZoneDialog.exec() == QDialog.Accepted:
-            logger.info(f"addZoneDialog.ip_field: {addZoneDialog.get_ip_field().text()}")
-            logger.info(f"addZoneDialog.name_field: {addZoneDialog.get_name_field().text()}")
-            ip_field = addZoneDialog.get_ip_field()
-            name_field = addZoneDialog.get_name_field()
-
-            new_zone = Orange(
-                ip=ip_field.text(),
-                name=name_field.text(),
-                isChecked=True
-            )
-
-            if name_field.text() == "" or ip_field.text() == "":
-                QMessageBox.information(self, 'Уведомление.',
-                                        'Введите название зоны!')
-            else:
-                self.zones_repo.add_zone(new_zone)
-
-        self.update_zones()
-
-    def remove_zone(self, selected_zone: Orange):
-        try:
-            # selected_zone = self.zone_list_widget.get_current_zone()
-            self.zones_repo.remove_zone(selected_zone)
-            self.status_api.remove_broker(selected_zone.ip)
-        except Exception as e:
-            logging.error(f"main: remove_zone{e}")
-
-        self.update_zones()
+    def remove_zone(self, *a, **k):
+        return self.vm.zones.remove_zone(*a, **k)
 
     #
     #
-    def update_zones(self, status=None):
-        if status:
-            print(f"main: status on upd zonest {status}")
+    def update_zones(self, *a, **k):
+        return self.vm.zones.update_zones(*a, **k)
 
-            self.status_sender.setStatus(status)
-            # self.api_thread.start()
+    def update_zone_status(self, *a, **k):
+        return self.vm.zones.update_zone_status(*a, **k)
 
-            self.update_zone_status(status)
-        else:
-            self.zone_list_widget.update_zones(self.ZONE_LIST)
+    def update_ui(self, *a, **k):
+        return self.vm.zones.update_ui(*a, **k)
 
-            #self.update_ui()
-
-    def update_zone_status(self, status):
-        for zone in self.ZONE_LIST:
-            if zone.ip == status.orange_ip:
-                zone.is_playing = status.is_playing
-                zone.is_streaming = status.is_streaming
-                zone.is_sip_running = status.is_sip_running
-                zone.is_online = self.status_api.is_online(status.orange_ip)
-                zone.is_warning = "Error" in status.warn_message
-                zone.tooltip_warn_message = status.warn_message
-                zone.tooltip_message = status.message
-        self.zone_list_widget.update_zones(self.ZONE_LIST)
-
-    def update_ui(self):
-        self.update_list_on_slider(self.grid_size)
-        self.zone_list_widget.update_zones(self.ZONE_LIST)
-        # self.setupUi(self)
-        self.update()
-
-    @pyqtSlot(OrangeStatus)
-    def orange_status_receiver(self, status: OrangeStatus):
-        """mqtt"""
-        self.update_zones(status)
+    def orange_status_receiver(self, *a, **k):
+        return self.vm.zones.orange_status_receiver(*a, **k)
 
     # ------------------------------------------------------------------
     # Files feature — thin View proxies delegating to FilesViewModel.
