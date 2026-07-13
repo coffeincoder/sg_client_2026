@@ -1,6 +1,7 @@
 from PyQt5.QtCore import QObject
 
 from src.viewmodel.files_viewmodel import FilesViewModel
+from src.viewmodel.recording_viewmodel import RecordingViewModel
 from src.viewmodel.scenarios_viewmodel import ScenariosViewModel
 from src.viewmodel.tts_viewmodel import TtsViewModel
 from src.viewmodel.zones_viewmodel import ZonesViewModel
@@ -16,5 +17,6 @@ class MainViewModel(QObject):
         self.scenarios = ScenariosViewModel(view)
         self.zones = ZonesViewModel(view)
         self.tts = TtsViewModel(view)
+        self.recording = RecordingViewModel(view)
         # фич-VM подключаются здесь в Фазе 2:
         # ...
