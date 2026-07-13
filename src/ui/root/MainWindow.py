@@ -134,7 +134,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.play_btn.clicked.connect(self.launch_play)
         self.stop_btn.clicked.connect(self.launch_stop)
-        self.text_to_file_btn.clicked.connect(self.launch_yandex_process)
+        self.text_to_file_btn.clicked.connect(self.vm.tts.launch_yandex_process)
         self.zone_add_btn.clicked.connect(self.vm.zones.add_zone)
 
         self.auto_search_zones_btn.clicked.connect(self.vm.zones.auto_search_zones)
@@ -151,7 +151,7 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         self.volume_slider.valueChanged.connect(self.set_volume)
         self.update_volume_on_oranges_btn.clicked.connect(self.send_new_volume_value)
         self.list_scale_slider.valueChanged.connect(self.vm.files.update_list_on_slider)
-        self.voice_select_btn.clicked.connect(self.select_voice_menu)
+        self.voice_select_btn.clicked.connect(self.vm.tts.select_voice_menu)
         self.realtime_button.clicked.connect(self.launch_realtime)
         self.stop_realtime_button.clicked.connect(self.orange_stop_realtime)
 
@@ -312,12 +312,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def send_new_volume_value(self):
         self.commit_orange_command("vol", self.play_threads, vol=self.volume_slider.value())
 
-    def launch_yandex_process(self):
-        print('yandex')
-        try:
-            self.yandex_things()
-        except Exception as e:
-            logger.info(f"launch_yandex_process: {e}")
+    def launch_yandex_process(self, *a, **k):
+        return self.vm.tts.launch_yandex_process(*a, **k)
 
     def launch_realtime(self):
         if not self.is_streaming_flag:
@@ -807,45 +803,14 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         dialog = SettingsDialog()
         dialog.exec_()
 
-    def select_voice_menu(self):
-        menu = QMenu(self)
-        voice1 = menu.addAction("мужской доброжелательный")
-        voice2 = menu.addAction("женский доброжелательный")
-        voice3 = menu.addAction("мужской нейтральный")
-        voice4 = menu.addAction("женский нейтральный")
+    def select_voice_menu(self, *a, **k):
+        return self.vm.tts.select_voice_menu(*a, **k)
 
-        voice1.triggered.connect(lambda: self.set_voice_params('мужской доброжелательный'))
-        voice2.triggered.connect(lambda: self.set_voice_params('женский доброжелательный'))
-        voice3.triggered.connect(lambda: self.set_voice_params('мужской нейтральный'))
-        voice4.triggered.connect(lambda: self.set_voice_params('женский нейтральный'))
+    def set_voice_params(self, *a, **k):
+        return self.vm.tts.set_voice_params(*a, **k)
 
-        button = self.sender()
-        menu.exec_(button.mapToGlobal(button.rect().bottomLeft()))
-
-    def set_voice_params(self, voice):
-        self.selected_voice = voice
-        self.selected_voice_text.setText(voice)
-
-    def get_voice_params(self) -> tuple[str, str]:
-        VOICE = ""
-        EMOTION = ""
-        if self.selected_voice == 'мужской доброжелательный':
-            VOICE = 'filipp'
-            EMOTION = 'good'
-
-        if self.selected_voice == 'мужской нейтральный':
-            VOICE = 'filipp'
-            EMOTION = 'neutral'
-
-        if self.selected_voice == 'женский доброжелательный':
-            VOICE = 'alena'
-            EMOTION = 'good'
-
-        if self.selected_voice == 'женский нейтральный':
-            VOICE = 'alena'
-            EMOTION = 'neutral'
-
-        return VOICE, EMOTION
+    def get_voice_params(self, *a, **k):
+        return self.vm.tts.get_voice_params(*a, **k)
 
     def set_light_theme(self):
         set_light_theme()
@@ -974,101 +939,28 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def upload_custom_file(self, *args, **kwargs):
         return self.vm.files.upload_custom_file(*args, **kwargs)
 
-    @pyqtSlot(int)
-    def progress_update(self, progress):
-        self.progressBar.setValue(progress)
-        logger.info(f"Прогресс выполнения: {progress}%")
+    # --- TTS thin proxies (Task 7) ---
+    # progress_update: still connected from commit_orange_command /
+    #   commit_orange_command_scenario (signal_progress_bar.connect(self.progress_update))
+    # on_ffmpeg_finished: still connected from handle_recognizer_result
+    #   (ffmpeg_t.convert_finished.connect(self.on_ffmpeg_finished))
+    # yandex_things: still called from __init__ template-load block as
+    #   self.yandex_things(data) — proxy forwards *a,**k verbatim (preserves
+    #   the pre-existing arg-mismatch bug).
+    # on_ya_response / select_voice_menu / set_voice_params / get_voice_params /
+    #   launch_yandex_process: also proxied for any remaining callers.
 
-    @pyqtSlot(str, dict)
-    def on_ya_response(self, status_message, params):
-        if status_message.find("ошибка") != -1:
+    def progress_update(self, *a, **k):
+        return self.vm.tts.progress_update(*a, **k)
 
-            if platform.system() == 'Windows':
-                self.progress_indicator.stopIndicate()
-                QMessageBox.information(self, 'Не удалось озвучить текст',
-                                        f" Нет соединения с интернетом: "
-                                        f"\n{status_message}\n"
-                                        )
+    def on_ya_response(self, *a, **k):
+        return self.vm.tts.on_ya_response(*a, **k)
 
-            elif platform.system() == 'Linux':
-                QMessageBox.information(self, 'Не удалось озвучить текст',
-                                        f" Нет соединения с интернетом: "
-                                        f"\n{status_message}\n"
-                                        f"\nТекст будет озвучен локально, "
-                                        f"голос может отличаться от выбранного."
-                                        )
+    def yandex_things(self, *a, **k):
+        return self.vm.tts.yandex_things(*a, **k)
 
-                # локальная озвучка
-                mp3_file_name = params['file_name']
-                full_path_mp3_folder = os.path.join(os.getcwd(), mp3_files)
-                full_path_to_mp3_file = os.path.join(full_path_mp3_folder, mp3_file_name)
-                full_path_to_wav_file = os.path.join(full_path_mp3_folder, f"{mp3_file_name[:-4]}.wav")
-                text = params['text']
-                #
-                command = (f"echo '{text}' | "
-                           f"RHVoice-test -R 48000 -p anna+CLB -r 100 -t 85 -v 130 -o - > {full_path_to_wav_file}")
-                logger.info(f"command to rhvoice: {command}")
-                subprocess.run(command, shell=True)
-
-                ffmpeg_t = FfmpegThread(
-                    input_file=full_path_to_wav_file,
-                    output_file=full_path_to_mp3_file,
-                    params=params
-                )
-                ffmpeg_t.convert_finished.connect(self.on_ffmpeg_finished)
-                ffmpeg_t.run()
-
-        if params["success"] == 1:
-            self.add_file_item(
-                params["text"],
-                params["file_name"],
-                params["text"],
-                params["voice"]
-            )
-
-    def yandex_things(self):
-
-        input_text = self.main_text_edit_field.toPlainText()
-
-        if input_text != '':
-            if len(input_text) < 250:
-                settings_dict = settings()
-
-                TOKEN = settings_dict["iam_token"]
-                FOLDER_ID = settings_dict["folder_id"]
-                VOICE, EMOTION = self.get_voice_params()
-                TEXT = input_text.replace('//', '')
-                short_voice = f"{VOICE[0]}{EMOTION[0]}"
-
-                file_name_without_extension = f"{short_voice}{last_five_chars_of_datetime_timestamp()}_{self.main_text_edit_field.toPlainText()[:250]}"
-                file_name = f"{sanitize_filename(file_name_without_extension)}.mp3"
-
-                file_path = os.path.join(mp3_files, file_name)
-
-                try:
-                    yandex = YandexThread(
-                        file_name=file_name,
-                        file_path=file_path,
-                        TEXT=TEXT,
-                        TOKEN=TOKEN,
-                        folder_id=FOLDER_ID,
-                        VOICE=VOICE,
-                        EMOTION=EMOTION
-                    )
-                    yandex.yandex_things_status.connect(self.on_ya_response)
-                    yandex.run()
-
-                except Exception as e:
-                    logger.info(f"except {e}")
-                    QMessageBox.information(self, 'Уведомление.', f'{e}:\n Нет соединения с интернетом. ')
-            else:
-                self.progress_indicator.stopIndicate()
-                QMessageBox.information(self, 'Уведомление.',
-                                        'похоже, Вы ввели слишком длинный текст. Пожалуйста, сократите текст до 250'
-                                        'символов или разбейте текст на два файла')
-        else:
-            self.progress_indicator.stopIndicate()
-            QMessageBox.information(self, 'Уведомление.', 'Введите текст для озвучки')
+    def on_ffmpeg_finished(self, *a, **k):
+        return self.vm.tts.on_ffmpeg_finished(*a, **k)
 
     @pyqtSlot(str, str)
     def tcp_orange_callback_status(self, msg, ip):
