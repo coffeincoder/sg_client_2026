@@ -132,8 +132,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         # Wire up ViewModel BEFORE signal connects so self.vm.files is available
         self.vm = MainViewModel(self)
 
-        self.play_btn.clicked.connect(self.launch_play)
-        self.stop_btn.clicked.connect(self.launch_stop)
+        self.play_btn.clicked.connect(self.vm.playback.launch_play)
+        self.stop_btn.clicked.connect(self.vm.playback.launch_stop)
         self.text_to_file_btn.clicked.connect(self.vm.tts.launch_yandex_process)
         self.zone_add_btn.clicked.connect(self.vm.zones.add_zone)
 
@@ -149,11 +149,11 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.record_btn.clicked.connect(self.launch_rec)
         self.volume_slider.valueChanged.connect(self.set_volume)
-        self.update_volume_on_oranges_btn.clicked.connect(self.send_new_volume_value)
+        self.update_volume_on_oranges_btn.clicked.connect(self.vm.playback.send_new_volume_value)
         self.list_scale_slider.valueChanged.connect(self.vm.files.update_list_on_slider)
         self.voice_select_btn.clicked.connect(self.vm.tts.select_voice_menu)
-        self.realtime_button.clicked.connect(self.launch_realtime)
-        self.stop_realtime_button.clicked.connect(self.orange_stop_realtime)
+        self.realtime_button.clicked.connect(self.vm.playback.launch_realtime)
+        self.stop_realtime_button.clicked.connect(self.vm.playback.orange_stop_realtime)
 
         self.file_list_widget.delete_clicked.connect(self.vm.files.delete_file)
         self.file_list_widget.listen_clicked.connect(self.vm.files.play_file_local)
@@ -309,203 +309,35 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_connected(self, *a, **k):
         return self.vm.zones.on_connected(*a, **k)
 
-    def send_new_volume_value(self):
-        self.commit_orange_command("vol", self.play_threads, vol=self.volume_slider.value())
+    def send_new_volume_value(self, *a, **k):
+        return self.vm.playback.send_new_volume_value(*a, **k)
 
     def launch_yandex_process(self, *a, **k):
         return self.vm.tts.launch_yandex_process(*a, **k)
 
-    def launch_realtime(self):
-        if not self.is_streaming_flag:
-            if mic_is_ready():
-                self.orange_realtime()
-            else:
-                self.handle_no_microphone()
+    def launch_realtime(self, *a, **k):
+        return self.vm.playback.launch_realtime(*a, **k)
 
-    def launch_play(self):
-        if not self.is_streaming_flag:
-
-            index = self.filelist_tab_widget.currentIndex()
-            if index==0:
-                asyncio.run(self.orange_play())
-            if index==1:
-
-                scenario_name = self.layout_manager.main_window.scenario_listwidget.currentItem().text()
-                print(scenario_name)
-                asyncio.run(self.orange_play_scenario(scenario_name=scenario_name))
-
-
-
+    def launch_play(self, *a, **k):
+        return self.vm.playback.launch_play(*a, **k)
 
     def launch_rec(self, *a, **k):
         return self.vm.recording.launch_rec(*a, **k)
 
-    def launch_stop(self):
-        """stop operations 1"""
-        if not self.is_streaming_flag:
-            self.progress_indicator.indicate()
-            self.orange_stop()
+    def launch_stop(self, *a, **k):
+        return self.vm.playback.launch_stop(*a, **k)
 
-    def commit_orange_command(
-            self,
+    def commit_orange_command(self, *a, **k):
+        return self.vm.playback.commit_orange_command(*a, **k)
 
+    def commit_orange_command_scenario(self, *a, **k):
+        return self.vm.playback.commit_orange_command_scenario(*a, **k)
 
+    def on_streaming_status_changed(self, *a, **k):
+        return self.vm.playback.on_streaming_status_changed(*a, **k)
 
-
-            command: str,
-            thread_list: list,
-            filename=None,
-            ip=None,
-            text=None,
-            loop=None,
-            vol=None,
-            overload_value=0,
-            is_rtp=False
-    ):
-        if is_rtp:
-            logger.info("__RTP")
-        else:
-            logger.info(f"common orange command - {command}")
-        zones = self.ZONE_LIST
-
-        self.realtime_play_threads.clear()
-        self.stop_realtime_threads.clear()
-        self.play_threads.clear()
-        self.stop_threads.clear()
-        self.success_IPs.clear()
-
-        for zone in zones:
-            if zone.isChecked:
-                self.progress_indicator.indicate()
-                logger.info(f"commit_command({command}): зона '{zone.name}|{zone.ip}' установлена")
-                print(command)
-
-                _play_variant = None
-                if zone.subzone1 and zone.subzone2:
-                    _play_variant = 'channel_1_2'
-                elif zone.subzone1 and not zone.subzone2:
-                    _play_variant = 'channel_1'
-                elif not zone.subzone1 and  zone.subzone2:
-                    _play_variant = 'channel_2'
-                elif not zone.subzone2 and not zone.subzone2:
-                    _play_variant = 'no_channel'
-
-
-                t = OrangeWorkerTCP(
-                    command=command,
-                    ip=str(zone.ip),
-                    text=text,
-                    loop=loop,
-                    file_path=filename,
-                    vol=vol,
-                    overload_value=overload_value,
-                    play_variant=_play_variant
-                )
-
-                t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
-                t.status.connect(self.tcp_orange_callback_status)
-                t.signal_progress_bar.connect(self.vm.tts.progress_update)
-                t.success_rtp_signal.connect(self.on_orange_success)
-                t.final_signal.connect(self.on_orange_finished)
-                t.online_check.connect(self.vm.zones.update_online_status)
-                thread_list.append(t)
-                logger.info(
-                    f"commit_command({command}): список потоков для команды ({len(thread_list)}) : {thread_list}")
-
-        if command != 'vol':
-            self.mic_usage_indicator.setVisible(False)
-
-        for thread in thread_list:
-            logger.info(f"commit_command({command}): поток {thread} запущен")
-            thread.start()
-            if is_rtp:
-                thread.finished.connect(self.on_thread_finished)
-
-
-    def commit_orange_command_scenario(
-            self,
-            scenario_name:str,
-
-
-
-
-            command: str,
-            thread_list: list,
-            filename=None,
-            ip=None,
-            text=None,
-            loop=None,
-            vol=None,
-            overload_value=0,
-            is_rtp=False
-    ):
-        if is_rtp:
-            logger.info("__RTP")
-        else:
-            logger.info(f"common orange command - {command}")
-        zones = self.ZONE_LIST
-        print('11111111111111111111111111')
-        self.realtime_play_threads.clear()
-        self.stop_realtime_threads.clear()
-        self.play_threads.clear()
-        self.stop_threads.clear()
-        self.success_IPs.clear()
-        scenarios=self.load_scenarios()
-        print(scenario_name)
-        specific_scenario = scenarios.get(scenario_name)
-        print(specific_scenario)
-        if specific_scenario:
-            for item in specific_scenario.ScenarioItems:
-                print(item)
-                # Получаем объект Orange
-                print(item.zone.ip)
-                print(item.file.filename)
-
-                #self.progress_indicator.indicate()
-                #logger.info(f"commit_command({command}): зона '{zone.name}|{zone.ip}' установлена")
-                t = OrangeWorkerTCP(
-                    command=command,
-                    ip=str(item.zone.ip),
-                    text=text,
-                    loop=loop,
-                    file_path=os.path.join(paths.mp3_files,item.file.filename),
-                    vol=vol,
-                    overload_value=overload_value
-                )
-
-                t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
-                t.status.connect(self.tcp_orange_callback_status)
-                t.signal_progress_bar.connect(self.vm.tts.progress_update)
-                t.success_rtp_signal.connect(self.on_orange_success)
-                t.final_signal.connect(self.on_orange_finished)
-                t.online_check.connect(self.vm.zones.update_online_status)
-                thread_list.append(t)
-                logger.info(
-                    f"commit_command({command}): список потоков для команды ({len(thread_list)}) : {thread_list}")
-
-            if command != 'vol':
-                self.mic_usage_indicator.setVisible(False)
-
-            for thread in thread_list:
-                logger.info(f"commit_command({command}): поток {thread} запущен")
-                thread.start()
-                if is_rtp:
-                    thread.finished.connect(self.on_thread_finished)
-
-    @pyqtSlot(bool)
-    def on_streaming_status_changed(self, is_streaming: bool):
-        """Подключен к AudioStreamer и получает сигнал либо о старте трансляции либо об остановке"""
-        self.is_streaming_flag = is_streaming
-        if is_streaming:
-            self.stop_realtime_button.setIcon(QIcon(paths.img_files + os.sep + "broadcast-off-red.png"))
-        else:
-            self.stop_realtime_button.setIcon(QIcon(paths.img_files + os.sep + "broadcast-off-custom.png"))
-
-    def on_thread_finished(self):
-        self.finished_threads += 1
-        if self.finished_threads == len(self.realtime_play_threads):
-            self.start_rtp_session(self.success_IPs)
-            self.finished_threads = 0
+    def on_thread_finished(self, *a, **k):
+        return self.vm.playback.on_thread_finished(*a, **k)
 
     async def orange_play(self):
         # self.initList()
@@ -579,97 +411,23 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         except Exception as e:
             logger.info(f"функция play(self) в main.py, ошибка: {e}")
 
-    def orange_stop(self):
-        """stop operations 2"""
-        self.stop_threads.clear()
-        try:
-            self.commit_orange_command("stop", self.stop_threads)
-        except Exception as e:
-            logger.info(f"функция stop(self) в main.py, ошибка: {e}")
+    def orange_stop(self, *a, **k):
+        return self.vm.playback.orange_stop(*a, **k)
 
-    def orange_stop(self):
-        """stop operations 2"""
-        self.stop_threads.clear()
-        try:
-            self.commit_orange_command("stop", self.stop_threads)
-        except Exception as e:
-            logger.info(f"функция stop(self) в main.py, ошибка: {e}")
+    def orange_realtime(self, *a, **k):
+        return self.vm.playback.orange_realtime(*a, **k)
 
+    def start_rtp_session(self, *a, **k):
+        return self.vm.playback.start_rtp_session(*a, **k)
 
+    def handle_streamer_message(self, *a, **k):
+        return self.vm.playback.handle_streamer_message(*a, **k)
 
-    def orange_realtime(self):
-        self.orange_stop()
-        sleep(0.5)
-        self.realtime_play_threads.clear()
-        try:
-            self.commit_orange_command("play_realtime",
-                                       self.realtime_play_threads,
-                                       is_rtp=True
-                                       )
-        except Exception as e:
-            logger.info(f"функция realtime(self) в main.py, ошибка: {e}")
+    def handle_stream_status(self, *a, **k):
+        return self.vm.playback.handle_stream_status(*a, **k)
 
-    def start_rtp_session(self, ip_list):
-        if not ip_list:
-            QMessageBox.warning(self, "Ошибка", "Не указаны IP-адреса зон")
-            return
-
-        # Остановка предыдущей трансляции
-        if hasattr(self, 'audio_streamer') and self.audio_streamer:
-            self.audio_streamer.stop()
-            time.sleep(0.5)
-
-        # Создание нового потока трансляции
-        self.audio_streamer = AudioStreamer(ip_list)
-        self.audio_streamer.rtp_process_message.connect(self.handle_streamer_message)
-        self.audio_streamer.stream_status.connect(self.handle_stream_status)
-        self.audio_streamer.start()
-
-        # Визуальная индикация
-        self.mic_usage_indicator.setVisible(True)
-        self.mic_usage_indicator.change_gif(f'{paths.img_files}/mic.gif')
-
-    def handle_streamer_message(self, msg):
-        """Обработка сообщений от потока трансляции"""
-        if "ошибка" in msg.lower():
-            QMessageBox.warning(self, "Ошибка трансляции", msg)
-            self.mic_usage_indicator.setVisible(False)
-
-    def handle_stream_status(self, is_active):
-        """Обработка изменения статуса трансляции"""
-        self.is_streaming_flag = is_active
-        if not is_active:
-            self.mic_usage_indicator.setVisible(False)
-
-    def orange_stop_realtime(self):
-        """Остановка трансляции"""
-        if hasattr(self, 'audio_streamer') and self.audio_streamer:
-            self.audio_streamer.stop()
-            self.audio_streamer = None
-
-        # Остановка на устройствах
-        self.commit_orange_command('stop_realtime', self.stop_realtime_threads)
-
-    def orange_stop_realtime(self):
-        if self.audio_streamer is not None:
-            self.audio_streamer.baseRTP = RTP(
-                marker=False,
-                payloadType=PayloadType.L16_1chan,
-                sequenceNumber=random.randint(0, 65535),
-                timestamp=random.randint(0, 4294967295),
-                ssrc=random.randint(0, 4294967295),
-            )
-            sleep(0.5)
-            self.audio_streamer.stopFlag = True
-            sleep(0.5)
-            self.audio_streamer.stop()
-            self.audio_streamer = None
-
-        try:
-            self.commit_orange_command('stop_realtime', self.stop_realtime_threads)
-
-        except Exception as e:
-            logging.error(f"функция stop_realtime(self) в main.py, ошибка: {e}")
+    def orange_stop_realtime(self, *a, **k):
+        return self.vm.playback.orange_stop_realtime(*a, **k)
 
     def do_rec(self, *a, **k):
         return self.vm.recording.do_rec(*a, **k)
@@ -692,17 +450,11 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def handle_empty_recognition(self, *a, **k):
         return self.vm.recording.handle_empty_recognition(*a, **k)
 
-    @pyqtSlot(bool)
-    def on_orange_finished(self, signal):
-        if signal:
-            self.progress_indicator.stopIndicate()
+    def on_orange_finished(self, *a, **k):
+        return self.vm.playback.on_orange_finished(*a, **k)
 
-    @pyqtSlot(str)
-    def on_orange_success(self, ip):
-        """По идее должен собирать IP тех зон до которых достучались с командами"""
-        self.success_IPs.append(ip)
-        # self.progress_indicator.stopIndicate()
-        logger.info(f"\nmain on_orange_success: список IP-{self.success_IPs}")
+    def on_orange_success(self, *a, **k):
+        return self.vm.playback.on_orange_success(*a, **k)
 
     def showSettingsDialog(self):
         dialog = SettingsDialog()
@@ -858,30 +610,17 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
     def on_ffmpeg_finished(self, *a, **k):
         return self.vm.tts.on_ffmpeg_finished(*a, **k)
 
-    @pyqtSlot(str, str)
-    def tcp_orange_callback_status(self, msg, ip):
-        QMessageBox.information(self, 'уведомление', f"{ip}\n{msg}")
+    def tcp_orange_callback_status(self, *a, **k):
+        return self.vm.playback.tcp_orange_callback_status(*a, **k)
 
-    @pyqtSlot(bool)
-    def handle_alarm_off(self, is_yes):
-        """Приходит всегда когда заканчивается стрим"""
-        if is_yes:
-            self.mic_usage_indicator.setVisible(False)
-            self.orange_stop()
+    def handle_alarm_off(self, *a, **k):
+        return self.vm.playback.handle_alarm_off(*a, **k)
 
-    @pyqtSlot(str)
-    def handle_some_msg(self, msg):
-        """Общая функция для приема сообщений которые надо показать"""
-        if msg.find("Ошибка в процессе трансляци") != -1:
-            QMessageBox.information(self, 'уведомление', msg)
+    def handle_some_msg(self, *a, **k):
+        return self.vm.playback.handle_some_msg(*a, **k)
 
-    @pyqtSlot(str, int)
-    def indicate_file_played_on_orange(self, ip, duration):
-        """Должен срабатывать на команде play когда приходит ответ от оранжа что File is playing"""
-        # # self.now_playing.setVisible(True)
-        # print('duration', duration)
-        # QTimer.singleShot(duration * 1000, lambda: self.now_playing.setVisible(False))
-        logger.info(f"main: indicate_file_played_on_orange: {ip}")
+    def indicate_file_played_on_orange(self, *a, **k):
+        return self.vm.playback.indicate_file_played_on_orange(*a, **k)
 
     @pyqtSlot(bool, dict)
     def on_ffmpeg_finished(self, success: bool, params: dict):
