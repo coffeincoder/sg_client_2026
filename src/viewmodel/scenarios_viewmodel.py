@@ -35,20 +35,6 @@ class ScenariosViewModel(QObject):
     # Методы перенесены из MainWindow VERBATIM (self.sheduler → self.view.sheduler)
     # ------------------------------------------------------------------
 
-    def on_modified(self, event):
-        print(f"Событие изменения файла: {event.src_path}")
-        if event.src_path.endswith(".json"):
-            print(f"Изменен файл: {event.src_path}. Перезапуск планировщика.")
-            self.view.sheduler.stop()   # Остановить текущий планировщик
-            self.view.sheduler.wait()   # Подождать завершения потока
-
-            self.view.sheduler.load_schedules()  # Перезагрузить расписания
-            if not self.view.sheduler.isRunning():  # Проверка, что поток не запущен
-                print("Запуск нового планировщика.")
-                self.view.sheduler.start()  # Запустить новый планировщик
-            else:
-                print("Планировщик уже запущен.")
-
     def on_task_executed(self, s_name, filename):
         # Создание окна сообщения
 

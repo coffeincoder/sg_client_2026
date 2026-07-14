@@ -7,6 +7,7 @@ stop_realtime_threads, success_IPs, finished_threads, is_streaming_flag,
 audio_streamer, status_sender) остаётся на View — доступ через self.view.<attr>.
 PlaybackViewModel.__init__ ЛЁГКИЙ: только self.view.
 """
+import asyncio
 import logging
 import os
 import time
@@ -65,13 +66,11 @@ class PlaybackViewModel(QObject):
 
             index = self.view.filelist_tab_widget.currentIndex()
             if index==0:
-                import asyncio
                 asyncio.run(self.view.orange_play())
             if index==1:
 
                 scenario_name = self.view.layout_manager.main_window.scenario_listwidget.currentItem().text()
                 print(scenario_name)
-                import asyncio
                 asyncio.run(self.view.orange_play_scenario(scenario_name=scenario_name))
 
     def launch_stop(self):
@@ -249,14 +248,6 @@ class PlaybackViewModel(QObject):
         except Exception as e:
             logger.info(f"функция stop(self) в main.py, ошибка: {e}")
 
-    def orange_stop(self):
-        """stop operations 2"""
-        self.view.stop_threads.clear()
-        try:
-            self.commit_orange_command("stop", self.view.stop_threads)
-        except Exception as e:
-            logger.info(f"функция stop(self) в main.py, ошибка: {e}")
-
     def orange_realtime(self):
         self.orange_stop()
         sleep(0.5)
@@ -300,15 +291,6 @@ class PlaybackViewModel(QObject):
         self.view.is_streaming_flag = is_active
         if not is_active:
             self.view.mic_usage_indicator.setVisible(False)
-
-    def orange_stop_realtime(self):
-        """Остановка трансляции"""
-        if hasattr(self.view, 'audio_streamer') and self.view.audio_streamer:
-            self.view.audio_streamer.stop()
-            self.view.audio_streamer = None
-
-        # Остановка на устройствах
-        self.commit_orange_command('stop_realtime', self.view.stop_realtime_threads)
 
     def orange_stop_realtime(self):
         if self.view.audio_streamer is not None:
