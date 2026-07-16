@@ -171,5 +171,7 @@ class RecordingViewModel(QObject):
         QMessageBox.information(self.view, 'Уведомление.',
                                 'Похоже, у Вас не подключен микрофон. Подключите микрофон и повторите попытку')
         self.view.record_btn.setText('Начать запись')
-        # Verbatim from MainWindow: use type(self.view) to avoid circular import
-        type(self.view).singleton = type(self.view)(self.view.app, self.view.system_checker)
+        # NB: раньше здесь было `MainWindow.singleton = MainWindow(app, system_checker)` —
+        # оно всегда падало TypeError (2 арг при __init__(self, application)), а `singleton`
+        # нигде не читался. Пересоздавать окно при отсутствии микрофона не нужно: метод уже
+        # сбросил индикаторы и показал сообщение. Строка удалена (баг был и до рефактора).

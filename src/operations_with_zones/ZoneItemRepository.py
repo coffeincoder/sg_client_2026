@@ -149,6 +149,19 @@ class ZoneItemRepository:
             logger.warning(f"Ошибка загрузки зон: {e}")
             self.all_zones = []
 
+    def save(self, zones: Optional[List[Orange]] = None):
+        """Публичное сохранение зон в файл.
+
+        Часть вызовов передаёт список явно (rename_zone -> save(ZONE_LIST)).
+        В проде ZONE_LIST это тот же объект, что и self.all_zones
+        (MainWindow: ZONE_LIST = zones_repo.all_zones), поэтому переприсваивание
+        безопасно и не рассинхронизирует ссылку. Если аргумент не передан —
+        сохраняем текущее состояние.
+        """
+        if zones is not None:
+            self.all_zones = zones
+        self._save_all_zones()
+
     def _save_all_zones(self):
         """Внутренный метод для сохранения всех зон в файл"""
         try:
