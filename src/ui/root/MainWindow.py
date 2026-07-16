@@ -28,11 +28,11 @@ import pyaudio
 import qdarkstyle
 import requests
 from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QEvent, QTime, QSharedMemory, QMutex
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont, QKeySequence
 from PyQt5.QtWidgets import (
     QAction, QMessageBox, QDialog, QMenu, QFileDialog, QApplication,
     QTextEdit, QPushButton, QComboBox, QHBoxLayout, QLabel, QTabWidget,
-    QDesktopWidget,
+    QDesktopWidget, QShortcut,
 )
 from qtpy import QtWidgets
 from rtp import RTP, PayloadType
@@ -131,6 +131,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Wire up ViewModel BEFORE signal connects so self.vm.files is available
         self.vm = MainViewModel(self)
+        self._tone_shortcut = QShortcut(QKeySequence("Ctrl+Shift+T"), self)
+        self._tone_shortcut.activated.connect(self.vm.playback.toggle_test_tone)
 
         self.play_btn.clicked.connect(self.vm.playback.launch_play)
         self.stop_btn.clicked.connect(self.vm.playback.launch_stop)
