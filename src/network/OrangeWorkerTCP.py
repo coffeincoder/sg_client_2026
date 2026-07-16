@@ -69,7 +69,7 @@ class OrangeWorkerTCP(QThread):
     final_signal = pyqtSignal(bool)
     online_check = pyqtSignal(bool, str)
 
-    def __init__(self, command, ip, text, file_path=None, loop=None, vol=None, overload_value=None, play_variant=None):
+    def __init__(self, command, ip, text, file_path=None, loop=None, vol=None, overload_value=None, play_variant=None, freq=None):
         QThread.__init__(self)
         self.command = command
         self.ip = ip
@@ -80,6 +80,7 @@ class OrangeWorkerTCP(QThread):
         self.text = text
         self.overload_value = overload_value
         self.play_variant = play_variant
+        self.freq = freq
 
     def emit_status(self, msg, ip):
         self.status.emit(msg, ip)
@@ -109,6 +110,12 @@ class OrangeWorkerTCP(QThread):
             create_simple_command(ip, port, self.timeout,
                                   {"command": 'vol', "value": str(self.vol),
                                    "overload_value": str(self.overload_value)})
+
+        if self.command == 'test_tone':
+            create_simple_command(ip, port, self.timeout,
+                                  {"command": 'test_tone',
+                                   "freq": str(self.freq),
+                                   "vol": str(self.vol)})
 
         if self.command == 'play':
             status_response = create_simple_command(ip, port, self.timeout, {"command": 'status'})
