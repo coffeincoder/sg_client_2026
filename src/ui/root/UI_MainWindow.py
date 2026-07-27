@@ -497,7 +497,7 @@ class Ui_MainWindow(object):
         self.stop_btn.setText(_translate("MainWindow", "Остановить"))
         self.stop_btn.setFont(QFont("Arial", 16))
 
-        self.play_btn.setText(_translate("MainWindow", "Проиграть"))
+        self.play_btn.setText(_translate("MainWindow", "Воспроизвести"))
         self.play_btn.setFont(QFont("Arial", 16))
 
         self.repeat_check_box.setText(_translate("MainWindow", "Повторять"))
