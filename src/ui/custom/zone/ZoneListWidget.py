@@ -1,7 +1,7 @@
 import logging
 from typing import List
 
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt, QSize
 from PyQt5.QtWidgets import QListWidget, QListWidgetItem
 from typing_extensions import Optional
 
@@ -19,6 +19,9 @@ class ZoneListWidget(QListWidget):
         super(ZoneListWidget, self).__init__(parent)
         self.setSpacing(12)
         self.setStyleSheet("QListWidget { background: transparent; border: none; }")
+        # карточки зон должны занимать ширину панели, а не свою предпочтительную,
+        # иначе они вылезают вправо и появляется горизонтальный скролл
+        self.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOff)
 
     def add_zone(self, zone: Orange):
         item = QListWidgetItem()
@@ -26,7 +29,8 @@ class ZoneListWidget(QListWidget):
         zone_widget.delete_clicked.connect(self.delete_zone)
         zone_widget.rename_clicked.connect(self.rename_zone)
 
-        item.setSizeHint(zone_widget.sizeHint())
+        # ширину не навязываем (0) — элемент возьмёт ширину списка; фиксируем только высоту
+        item.setSizeHint(QSize(0, zone_widget.sizeHint().height()))
         self.addItem(item)
         self.setItemWidget(item, zone_widget)
 
