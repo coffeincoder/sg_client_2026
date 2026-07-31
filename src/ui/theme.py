@@ -123,9 +123,9 @@ QTabBar::tab:selected {{ background: {t.accent}; color: white; }}
 QTabBar::tab:hover:!selected {{ color: {t.text}; }}
 
 /* инпуты */
-QComboBox, QLineEdit, QSpinBox {{ background: {t.elev}; border: 1px solid {t.border};
+QComboBox, QLineEdit, QSpinBox, QTextEdit {{ background: {t.elev}; border: 1px solid {t.border};
         border-radius: 8px; padding: 6px 10px; }}
-QComboBox:hover, QLineEdit:focus, QSpinBox:focus {{ border-color: {t.accent}; }}
+QComboBox:hover, QLineEdit:focus, QSpinBox:focus, QTextEdit:focus {{ border-color: {t.accent}; }}
 QComboBox::drop-down {{ border: none; width: 22px; }}
 QComboBox QAbstractItemView {{ background: {t.elev}; border: 1px solid {t.border};
         selection-background-color: {t.accent}; outline: none; }}
