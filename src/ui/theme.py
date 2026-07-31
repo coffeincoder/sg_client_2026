@@ -108,6 +108,12 @@ QToolButton {{ background: transparent; border: 1px solid transparent; border-ra
 QToolButton:hover {{ border-color: {t.accent}; }}
 QToolButton::menu-indicator {{ image: none; }}
 
+/* всплывающее меню (по шестерёнке у файла и любые QMenu) — следует теме */
+QMenu {{ background: {t.card}; border: 1px solid {t.border}; border-radius: 8px; padding: 4px; }}
+QMenu::item {{ background: transparent; color: {t.text}; padding: 8px 20px; border-radius: 6px; }}
+QMenu::item:selected {{ background: {t.accent}; color: white; }}
+QMenu::separator {{ height: 1px; background: {t.border}; margin: 4px 8px; }}
+
 /* вкладки */
 QTabWidget::pane {{ border: 1px solid {t.border}; border-radius: 10px; top: -1px; background: {t.card}; }}
 QTabBar {{ margin-left: 8px; }}
@@ -117,9 +123,9 @@ QTabBar::tab:selected {{ background: {t.accent}; color: white; }}
 QTabBar::tab:hover:!selected {{ color: {t.text}; }}
 
 /* инпуты */
-QComboBox, QLineEdit, QSpinBox {{ background: {t.elev}; border: 1px solid {t.border};
+QComboBox, QLineEdit, QSpinBox, QTextEdit {{ background: {t.elev}; border: 1px solid {t.border};
         border-radius: 8px; padding: 6px 10px; }}
-QComboBox:hover, QLineEdit:focus, QSpinBox:focus {{ border-color: {t.accent}; }}
+QComboBox:hover, QLineEdit:focus, QSpinBox:focus, QTextEdit:focus {{ border-color: {t.accent}; }}
 QComboBox::drop-down {{ border: none; width: 22px; }}
 QComboBox QAbstractItemView {{ background: {t.elev}; border: 1px solid {t.border};
         selection-background-color: {t.accent}; outline: none; }}

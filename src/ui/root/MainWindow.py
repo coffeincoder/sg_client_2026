@@ -28,11 +28,11 @@ import pyaudio
 import qdarkstyle
 import requests
 from PyQt5.QtCore import QTimer, pyqtSlot, Qt, QEvent, QTime, QSharedMemory, QMutex
-from PyQt5.QtGui import QIcon, QFont
+from PyQt5.QtGui import QIcon, QFont, QKeySequence
 from PyQt5.QtWidgets import (
     QAction, QMessageBox, QDialog, QMenu, QFileDialog, QApplication,
     QTextEdit, QPushButton, QComboBox, QHBoxLayout, QLabel, QTabWidget,
-    QDesktopWidget,
+    QDesktopWidget, QShortcut,
 )
 from qtpy import QtWidgets
 from rtp import RTP, PayloadType
@@ -131,6 +131,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
 
         # Wire up ViewModel BEFORE signal connects so self.vm.files is available
         self.vm = MainViewModel(self)
+        self._tone_shortcut = QShortcut(QKeySequence("Ctrl+Shift+T"), self)
+        self._tone_shortcut.activated.connect(self.vm.playback.toggle_test_tone)
 
         self.play_btn.clicked.connect(self.vm.playback.launch_play)
         self.stop_btn.clicked.connect(self.vm.playback.launch_stop)
@@ -244,14 +246,14 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
         """Slot method called when the tab is changed."""
         index=self.filelist_tab_widget.currentIndex()
         if index==1:
-            layout = self.add_file_buttons_layout
+            layout = self.zone_buttons_layout
             for i in range(layout.count()):
                 item = layout.itemAt(i)
                 if item.widget():
                     item.widget().setVisible(False)
 
         if index ==0:
-            layout = self.add_file_buttons_layout
+            layout = self.zone_buttons_layout
             for i in range(layout.count()):
                 item = layout.itemAt(i)
                 if item.widget():
