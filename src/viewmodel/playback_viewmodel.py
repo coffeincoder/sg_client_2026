@@ -25,6 +25,7 @@ from src.network.AudioStremer import AudioStreamer
 from src.network.OrangeWorkerTCP import OrangeWorkerTCP
 from src.utils.app_helpers import mic_is_ready
 from src.utils.logger_config import setup_logger
+from src.viewmodel.channel_utils import active_channels, format_play_variant
 
 logger = setup_logger()
 
@@ -113,15 +114,7 @@ class PlaybackViewModel(QObject):
                 logger.info(f"commit_command({command}): зона '{zone.name}|{zone.ip}' установлена")
                 print(command)
 
-                _play_variant = None
-                if zone.subzone1 and zone.subzone2:
-                    _play_variant = 'channel_1_2'
-                elif zone.subzone1 and not zone.subzone2:
-                    _play_variant = 'channel_1'
-                elif not zone.subzone1 and  zone.subzone2:
-                    _play_variant = 'channel_2'
-                elif not zone.subzone2 and not zone.subzone2:
-                    _play_variant = 'no_channel'
+                _play_variant = format_play_variant(active_channels(zone))
 
 
                 t = OrangeWorkerTCP(
