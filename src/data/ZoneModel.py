@@ -14,10 +14,14 @@ class Orange:
     tooltip_warn_message: str = ""
     tooltip_message: str = ""
     zone_type: str = ""
-    subzone1: bool = False  # Новое поле для подзоны 1
-    subzone2: bool = False  # Новое поле для подзоны 2
+    subzone1: bool = False
+    subzone2: bool = False
+    subzone3: bool = False
+    subzone4: bool = False
     subzone1_name: str = ""
-    subzone2_name: str =""
+    subzone2_name: str = ""
+    subzone3_name: str = ""
+    subzone4_name: str = ""
     def to_json(self):
         return self.__dict__
 

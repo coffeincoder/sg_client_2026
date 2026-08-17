@@ -58,8 +58,12 @@ class ZoneItemRepository:
                 isChecked=zone_data["isChecked"],
                 subzone1=zone_data.get("subzone1", False),
                 subzone2=zone_data.get("subzone2", False),
+                subzone3=zone_data.get("subzone3", False),
+                subzone4=zone_data.get("subzone4", False),
                 subzone1_name=zone_data.get("subzone1_name", ""),
-                subzone2_name=zone_data.get("subzone2_name", "")
+                subzone2_name=zone_data.get("subzone2_name", ""),
+                subzone3_name=zone_data.get("subzone3_name", ""),
+                subzone4_name=zone_data.get("subzone4_name", "")
             )
             self.add_zone(new_zone)
 
@@ -140,8 +144,12 @@ class ZoneItemRepository:
                         isChecked=z.get('isChecked', False),
                         subzone1=z.get('subzone1', False),
                         subzone2=z.get('subzone2', False),
+                        subzone3=z.get('subzone3', False),
+                        subzone4=z.get('subzone4', False),
                         subzone1_name=z.get('subzone1_name', ''),
-                        subzone2_name=z.get('subzone2_name', '')
+                        subzone2_name=z.get('subzone2_name', ''),
+                        subzone3_name=z.get('subzone3_name', ''),
+                        subzone4_name=z.get('subzone4_name', '')
                     ) for z in zones_data
                 ]
             logger.info(f"Загружено {len(self.all_zones)} зон из файла")
