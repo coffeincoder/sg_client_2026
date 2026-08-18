@@ -2,8 +2,9 @@ import os
 os.environ.setdefault("QT_QPA_PLATFORM", "offscreen")
 
 import unittest
+from unittest import mock
 
-from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit
+from PyQt5.QtWidgets import QApplication, QCheckBox, QLineEdit, QDialog, QMessageBox
 
 from src.ui.fragments.UI_AddZoneWindow import UI_AddZoneWindow
 
@@ -45,6 +46,25 @@ class TestAddZoneWindowChannels(unittest.TestCase):
             self.assertFalse(fld.isEnabled())
 
         self.assertEqual(w.get_channels(), [(False, ""), (False, ""), (False, ""), (False, "")])
+
+    def test_validate_rejects_zero_channels(self):
+        """Should not accept if no channels are active."""
+        w = UI_AddZoneWindow("test_zone", "1.1.1.1", [], channels=None)
+
+        with mock.patch.object(QMessageBox, 'information'):
+            w.validate_and_accept()
+
+        self.assertNotEqual(w.result(), QDialog.Accepted)
+
+    def test_validate_accepts_with_at_least_one_channel(self):
+        """Should accept if at least one channel is active."""
+        channels = [(True, "out1"), (False, ""), (False, ""), (False, "")]
+        w = UI_AddZoneWindow("test_zone", "1.1.1.1", [], channels=channels)
+
+        with mock.patch.object(QMessageBox, 'information'):
+            w.validate_and_accept()
+
+        self.assertEqual(w.result(), QDialog.Accepted)
 
 
 if __name__ == "__main__":

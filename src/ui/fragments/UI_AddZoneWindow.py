@@ -91,6 +91,9 @@ class UI_AddZoneWindow(QDialog):
             if any(zone.name == self.name_field.text() for zone in self.all_zones):
                 QMessageBox.information(self, 'Уведомление.', 'Зона с таким названием уже существует!')
                 return
+            if not any(active for active, _ in self.get_channels()):
+                QMessageBox.information(self, 'Уведомление.', 'Выберите хотя бы один канал!')
+                return
             self.accept()
 
     def get_name_field(self) -> QLineEdit:
