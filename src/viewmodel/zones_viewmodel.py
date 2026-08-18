@@ -106,10 +106,21 @@ class ZonesViewModel(QObject):
 
             for zone in self.view.ZONE_LIST:
                 if selected_zone.name == zone.name:
-                    addZoneDialog = UI_AddZoneWindow(zone.name, zone.ip, self.view.ZONE_LIST, True)
+                    channels = [
+                        (zone.subzone1, zone.subzone1_name),
+                        (zone.subzone2, zone.subzone2_name),
+                        (zone.subzone3, zone.subzone3_name),
+                        (zone.subzone4, zone.subzone4_name),
+                    ]
+                    addZoneDialog = UI_AddZoneWindow(zone.name, zone.ip, self.view.ZONE_LIST, channels, True)
                     if addZoneDialog.exec() == QDialog.Accepted:
                         zone.name = addZoneDialog.get_name_field().text()
                         zone.ip = addZoneDialog.get_ip_field().text()
+                        ch = addZoneDialog.get_channels()
+                        zone.subzone1, zone.subzone1_name = ch[0]
+                        zone.subzone2, zone.subzone2_name = ch[1]
+                        zone.subzone3, zone.subzone3_name = ch[2]
+                        zone.subzone4, zone.subzone4_name = ch[3]
 
             self.view.zones_repo.save(self.view.ZONE_LIST)
 
@@ -131,10 +142,15 @@ class ZonesViewModel(QObject):
             ip_field = addZoneDialog.get_ip_field()
             name_field = addZoneDialog.get_name_field()
 
+            channels = addZoneDialog.get_channels()
             new_zone = Orange(
                 ip=ip_field.text(),
                 name=name_field.text(),
-                isChecked=True
+                isChecked=True,
+                subzone1=channels[0][0], subzone1_name=channels[0][1],
+                subzone2=channels[1][0], subzone2_name=channels[1][1],
+                subzone3=channels[2][0], subzone3_name=channels[2][1],
+                subzone4=channels[3][0], subzone4_name=channels[3][1],
             )
 
             if name_field.text() == "" or ip_field.text() == "":

@@ -96,7 +96,11 @@ class ZoneItemRepository:
                         subzone1: Optional[bool] = None,
                         subzone2: Optional[bool] = None,
                         subzone1_name: Optional[str] = None,
-                        subzone2_name: Optional[str] = None):
+                        subzone2_name: Optional[str] = None,
+                        subzone3: Optional[bool] = None,
+                        subzone4: Optional[bool] = None,
+                        subzone3_name: Optional[str] = None,
+                        subzone4_name: Optional[str] = None):
         """
         Обновляет состояние зоны и подзон
         Args:
@@ -106,6 +110,10 @@ class ZoneItemRepository:
             subzone2: Состояние подзоны 2
             subzone1_name: Название подзоны 1
             subzone2_name: Название подзоны 2
+            subzone3: Состояние подзоны 3
+            subzone4: Состояние подзоны 4
+            subzone3_name: Название подзоны 3
+            subzone4_name: Название подзоны 4
         """
         zone = self.get_zone_by_name(zone_name)
         if zone:
@@ -119,6 +127,14 @@ class ZoneItemRepository:
                 zone.subzone1_name = subzone1_name
             if subzone2_name is not None:
                 zone.subzone2_name = subzone2_name
+            if subzone3 is not None:
+                zone.subzone3 = subzone3
+            if subzone4 is not None:
+                zone.subzone4 = subzone4
+            if subzone3_name is not None:
+                zone.subzone3_name = subzone3_name
+            if subzone4_name is not None:
+                zone.subzone4_name = subzone4_name
             self._save_all_zones()
 
     def get_all(self) -> List[Orange]:
