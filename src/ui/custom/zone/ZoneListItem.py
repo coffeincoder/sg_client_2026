@@ -83,42 +83,43 @@ class ZoneListItem(QWidget):
         btn.setMenu(zone_menu)
         return btn
 
+    _SUBZONE_LABEL_STYLE = "QLabel { font-size: 11px; padding: 4px; background: transparent; }"
+
+    def _active_channel_names(self) -> list:
+        """Возвращает подписи активных каналов (1..4) для текущей зоны."""
+        names = []
+        for n in range(1, 5):
+            if getattr(self.zone, f"subzone{n}"):
+                names.append(getattr(self.zone, f"subzone{n}_name") or f"Канал {n}")
+        return names
+
     def _build_subzones(self) -> QWidget:
-        subzone_style = """
-            QCheckBox {
-                font-size: 11px;
-                padding: 4px;
-                spacing: 6px;
-            }
-            QCheckBox::indicator {
-                width: 16px;
-                height: 16px;
-            }
-        """
-        self.subzone1_checkbox = QCheckBox(self.zone.subzone1_name or "Подзона 1")
-        self.subzone2_checkbox = QCheckBox(self.zone.subzone2_name or "Подзона 2")
-
-        self.subzone1_checkbox.setStyleSheet(subzone_style)
-        self.subzone2_checkbox.setStyleSheet(subzone_style)
-        self.subzone1_checkbox.setChecked(self.zone.subzone1)
-        self.subzone2_checkbox.setChecked(self.zone.subzone2)
-        self.subzone1_checkbox.setEnabled(self.zone.isChecked)
-        self.subzone2_checkbox.setEnabled(self.zone.isChecked)
-
-        self.subzone1_checkbox.stateChanged.connect(self.update_subzone1_state)
-        self.subzone2_checkbox.stateChanged.connect(self.update_subzone2_state)
-
-        layout = QHBoxLayout()
-        layout.addWidget(self.subzone1_checkbox)
-        layout.addWidget(self.subzone2_checkbox)
-        layout.addStretch()
-        layout.setSpacing(10)
-        layout.setContentsMargins(10, 2, 5, 2)
+        self.subzones_layout = QHBoxLayout()
+        self.subzones_layout.addStretch()
+        self.subzones_layout.setSpacing(10)
+        self.subzones_layout.setContentsMargins(10, 2, 5, 2)
 
         container = QWidget()
-        container.setLayout(layout)
+        container.setLayout(self.subzones_layout)
         container.setStyleSheet("background: transparent;")
+        self.subzones_container = container
+        self._rebuild_subzone_labels()
         return container
+
+    def _rebuild_subzone_labels(self) -> None:
+        """Перестраивает read-only подписи активных каналов из self.zone."""
+        while self.subzones_layout.count():
+            item = self.subzones_layout.takeAt(0)
+            widget = item.widget()
+            if widget is not None:
+                widget.deleteLater()
+
+        for name in self._active_channel_names():
+            label = QLabel(name)
+            label.setStyleSheet(self._SUBZONE_LABEL_STYLE)
+            self.subzones_layout.addWidget(label)
+
+        self.subzones_layout.addStretch()
 
     def _assemble_layouts(self) -> None:
         self.checkbox = QCheckBox()
@@ -190,19 +191,14 @@ class ZoneListItem(QWidget):
             self.setStyleSheet("")
 
     def update_subzone_labels(self):
-        """Обновляет названия подзон из данных зоны"""
-        self.subzone1_checkbox.setText(self.zone.subzone1_name or "Подзона 1")
-        self.subzone2_checkbox.setText(self.zone.subzone2_name or "Подзона 2")
+        """Перестраивает подписи активных каналов из данных зоны"""
+        self._rebuild_subzone_labels()
 
     def update_zone_data(self, zone: Orange):
         """Обновляет данные зоны и перерисовывает интерфейс"""
         self.zone = zone
         self.update_subzone_labels()
         self.checkbox.setChecked(zone.isChecked)
-        self.subzone1_checkbox.setChecked(zone.subzone1)
-        self.subzone2_checkbox.setChecked(zone.subzone2)
-        self.subzone1_checkbox.setEnabled(zone.isChecked)
-        self.subzone2_checkbox.setEnabled(zone.isChecked)
         self.online_status_label.setText("Онлайн" if zone.is_online else "Не в сети")
         self.zone_ip_label.setText(zone.ip)
         self.zone_name_label.setText(zone.name)
@@ -231,19 +227,8 @@ class ZoneListItem(QWidget):
 
     def change_checked_state(self, state):
         self.zone.isChecked = state == Qt.Checked
-        # Только включаем/выключаем чекбоксы подзон, не сбрасывая их состояние
-        self.subzone1_checkbox.setEnabled(self.zone.isChecked)
-        self.subzone2_checkbox.setEnabled(self.zone.isChecked)
         self.save_zone_state()
         self._refresh_accents()
-
-    def update_subzone1_state(self, state):
-        self.zone.subzone1 = state == Qt.Checked
-        self.save_zone_state()
-
-    def update_subzone2_state(self, state):
-        self.zone.subzone2 = state == Qt.Checked
-        self.save_zone_state()
 
     def save_zone_state(self):
         try:
@@ -255,8 +240,12 @@ class ZoneListItem(QWidget):
                     zone['isChecked'] = self.zone.isChecked
                     zone['subzone1'] = self.zone.subzone1
                     zone['subzone2'] = self.zone.subzone2
+                    zone['subzone3'] = self.zone.subzone3
+                    zone['subzone4'] = self.zone.subzone4
                     zone['subzone1_name'] = self.zone.subzone1_name
                     zone['subzone2_name'] = self.zone.subzone2_name
+                    zone['subzone3_name'] = self.zone.subzone3_name
+                    zone['subzone4_name'] = self.zone.subzone4_name
 
             with open(zones_json, 'w') as file:
                 json.dump(zones, file, indent=4)
