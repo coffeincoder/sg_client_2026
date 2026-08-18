@@ -232,12 +232,12 @@ class Ui_MainWindow(object):
         self.add_file_from_text_btn = QtWidgets.QPushButton('Озвучить из текста')
         self.progress_indicator = IndicatorProgressBar(self.central_widget)
 
-        add_file_buttons_layout = QtWidgets.QHBoxLayout()
-        add_file_buttons_layout.addWidget(self.upload_custom_file_btn, 2)
-        add_file_buttons_layout.addWidget(self.add_file_from_mic_record_btn, 2)
-        add_file_buttons_layout.addWidget(self.add_file_from_text_btn, 2)
-        add_file_buttons_layout.addStretch(1)
-        add_file_buttons_layout.addWidget(self.progress_indicator, 1)
+        self.add_file_buttons_layout = QtWidgets.QHBoxLayout()
+        self.add_file_buttons_layout.addWidget(self.upload_custom_file_btn, 2)
+        self.add_file_buttons_layout.addWidget(self.add_file_from_mic_record_btn, 2)
+        self.add_file_buttons_layout.addWidget(self.add_file_from_text_btn, 2)
+        self.add_file_buttons_layout.addStretch(1)
+        self.add_file_buttons_layout.addWidget(self.progress_indicator, 1)
 
         # --- текст → файл ---
         self.main_text_edit_field = QtWidgets.QTextEdit(self.central_widget)
@@ -282,7 +282,7 @@ class Ui_MainWindow(object):
         gb.setSizePolicy(QtWidgets.QSizePolicy.Preferred, QtWidgets.QSizePolicy.Maximum)
         gb.setStyleSheet("QGroupBox { padding-bottom: 0px; }")
         self.add_file_layout = QtWidgets.QVBoxLayout(gb)
-        self.add_file_layout.addLayout(add_file_buttons_layout, 1)
+        self.add_file_layout.addLayout(self.add_file_buttons_layout, 1)
         self.add_file_layout.addWidget(self.stacked_widget, 2)
 
         def update_button_styles(active_button):
