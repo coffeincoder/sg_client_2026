@@ -50,6 +50,25 @@ class TestZoneListItemPresentChannelCheckboxes(unittest.TestCase):
 
         self.assertIs(item.zone.subzone1, False)
 
+    def test_active_but_not_present_is_hidden(self):
+        # Core of the two-level model: a channel that is active in the data
+        # but NOT present on the device must NOT appear. This proves the
+        # panel filters by present, not by active.
+        zone = Orange(
+            name="z",
+            ip="1.1.1.1",
+            subzone1_present=True,
+            subzone1=True,
+            subzone1_name="улица",
+            subzone3_present=False,   # not present...
+            subzone3=True,            # ...even though marked active in data
+            subzone3_name="призрак",
+        )
+        item = ZoneListItem(zone)
+
+        self.assertEqual(set(item.channel_checks.keys()), {1})
+        self.assertNotIn(3, item.channel_checks)
+
 
 if __name__ == "__main__":
     unittest.main()
