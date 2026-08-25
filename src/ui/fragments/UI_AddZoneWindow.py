@@ -61,14 +61,14 @@ class UI_AddZoneWindow(QDialog):
 
         self.channel_checks = []
         self.channel_fields = []
-        for i in range(4):
+        for i in range(8):
             chk = QCheckBox(f"Канал {i + 1}")
             fld = QLineEdit()
             fld.setPlaceholderText(f"Введите имя канала {i + 1}")
-            active, name = channels[i] if channels else (False, "")
-            chk.setChecked(active)
+            present, name = channels[i] if channels else (False, "")
+            chk.setChecked(present)
             fld.setText(name)
-            fld.setEnabled(active)
+            fld.setEnabled(present)
             chk.toggled.connect(fld.setEnabled)
             row = 2 + i
             self.input_layout.addWidget(chk, row, 0)

@@ -13,23 +13,25 @@ app = QApplication.instance() or QApplication([])
 
 class TestAddZoneWindowChannels(unittest.TestCase):
     def test_construct_with_channels(self):
-        channels = [(True, "a"), (False, "b"), (True, "c"), (False, "d")]
+        channels = [(True, "a"), (False, "b"), (True, "c"), (False, "d"),
+                    (True, "e"), (False, "f"), (True, "g"), (False, "h")]
         w = UI_AddZoneWindow("zone", "1.1.1.1", [], channels=channels)
 
         checks = [ch for ch in w.channel_checks]
         fields = [f for f in w.channel_fields]
-        self.assertEqual(len(checks), 4)
-        self.assertEqual(len(fields), 4)
+        self.assertEqual(len(checks), 8)
+        self.assertEqual(len(fields), 8)
         self.assertTrue(all(isinstance(c, QCheckBox) for c in checks))
         self.assertTrue(all(isinstance(f, QLineEdit) for f in fields))
 
-        self.assertTrue(fields[0].isEnabled())
-        self.assertFalse(fields[1].isEnabled())
+        for i, (present, _) in enumerate(channels):
+            self.assertEqual(fields[i].isEnabled(), present)
 
         self.assertEqual(w.get_channels(), channels)
 
     def test_toggle_checkbox_enables_field(self):
-        channels = [(True, "a"), (False, "b"), (True, "c"), (False, "d")]
+        channels = [(True, "a"), (False, "b"), (True, "c"), (False, "d"),
+                    (True, "e"), (False, "f"), (True, "g"), (False, "h")]
         w = UI_AddZoneWindow("zone", "1.1.1.1", [], channels=channels)
 
         w.channel_checks[1].setChecked(True)
@@ -45,7 +47,7 @@ class TestAddZoneWindowChannels(unittest.TestCase):
         for fld in w.channel_fields:
             self.assertFalse(fld.isEnabled())
 
-        self.assertEqual(w.get_channels(), [(False, ""), (False, ""), (False, ""), (False, "")])
+        self.assertEqual(w.get_channels(), [(False, "")] * 8)
 
     def test_validate_rejects_zero_channels(self):
         """Should not accept if no channels are active."""
@@ -58,7 +60,8 @@ class TestAddZoneWindowChannels(unittest.TestCase):
 
     def test_validate_accepts_with_at_least_one_channel(self):
         """Should accept if at least one channel is active."""
-        channels = [(True, "out1"), (False, ""), (False, ""), (False, "")]
+        channels = [(True, "out1"), (False, ""), (False, ""), (False, ""),
+                    (False, ""), (False, ""), (False, ""), (False, "")]
         w = UI_AddZoneWindow("test_zone", "1.1.1.1", [], channels=channels)
 
         with mock.patch.object(QMessageBox, 'information'):
