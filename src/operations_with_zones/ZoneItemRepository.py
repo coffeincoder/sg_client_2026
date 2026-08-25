@@ -60,10 +60,26 @@ class ZoneItemRepository:
                 subzone2=zone_data.get("subzone2", False),
                 subzone3=zone_data.get("subzone3", False),
                 subzone4=zone_data.get("subzone4", False),
+                subzone5=zone_data.get("subzone5", False),
+                subzone6=zone_data.get("subzone6", False),
+                subzone7=zone_data.get("subzone7", False),
+                subzone8=zone_data.get("subzone8", False),
                 subzone1_name=zone_data.get("subzone1_name", ""),
                 subzone2_name=zone_data.get("subzone2_name", ""),
                 subzone3_name=zone_data.get("subzone3_name", ""),
-                subzone4_name=zone_data.get("subzone4_name", "")
+                subzone4_name=zone_data.get("subzone4_name", ""),
+                subzone5_name=zone_data.get("subzone5_name", ""),
+                subzone6_name=zone_data.get("subzone6_name", ""),
+                subzone7_name=zone_data.get("subzone7_name", ""),
+                subzone8_name=zone_data.get("subzone8_name", ""),
+                subzone1_present=zone_data.get("subzone1_present", True),
+                subzone2_present=zone_data.get("subzone2_present", True),
+                subzone3_present=zone_data.get("subzone3_present", False),
+                subzone4_present=zone_data.get("subzone4_present", False),
+                subzone5_present=zone_data.get("subzone5_present", False),
+                subzone6_present=zone_data.get("subzone6_present", False),
+                subzone7_present=zone_data.get("subzone7_present", False),
+                subzone8_present=zone_data.get("subzone8_present", False)
             )
             self.add_zone(new_zone)
 
@@ -162,10 +178,26 @@ class ZoneItemRepository:
                         subzone2=z.get('subzone2', False),
                         subzone3=z.get('subzone3', False),
                         subzone4=z.get('subzone4', False),
+                        subzone5=z.get('subzone5', False),
+                        subzone6=z.get('subzone6', False),
+                        subzone7=z.get('subzone7', False),
+                        subzone8=z.get('subzone8', False),
                         subzone1_name=z.get('subzone1_name', ''),
                         subzone2_name=z.get('subzone2_name', ''),
                         subzone3_name=z.get('subzone3_name', ''),
-                        subzone4_name=z.get('subzone4_name', '')
+                        subzone4_name=z.get('subzone4_name', ''),
+                        subzone5_name=z.get('subzone5_name', ''),
+                        subzone6_name=z.get('subzone6_name', ''),
+                        subzone7_name=z.get('subzone7_name', ''),
+                        subzone8_name=z.get('subzone8_name', ''),
+                        subzone1_present=z.get('subzone1_present', True),
+                        subzone2_present=z.get('subzone2_present', True),
+                        subzone3_present=z.get('subzone3_present', False),
+                        subzone4_present=z.get('subzone4_present', False),
+                        subzone5_present=z.get('subzone5_present', False),
+                        subzone6_present=z.get('subzone6_present', False),
+                        subzone7_present=z.get('subzone7_present', False),
+                        subzone8_present=z.get('subzone8_present', False)
                     ) for z in zones_data
                 ]
             logger.info(f"Загружено {len(self.all_zones)} зон из файла")
