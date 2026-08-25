@@ -50,13 +50,15 @@ class TestAddZoneWindowChannels(unittest.TestCase):
         self.assertEqual(w.get_channels(), [(False, "")] * 8)
 
     def test_validate_rejects_zero_channels(self):
-        """Should not accept if no channels are active."""
+        """Should not accept if no channel is marked present on the device."""
         w = UI_AddZoneWindow("test_zone", "1.1.1.1", [], channels=None)
 
-        with mock.patch.object(QMessageBox, 'information'):
+        with mock.patch.object(QMessageBox, 'information') as info:
             w.validate_and_accept()
 
         self.assertNotEqual(w.result(), QDialog.Accepted)
+        # New two-level wording: validation is about present channels.
+        self.assertIn('у устройства', info.call_args[0][2])
 
     def test_validate_accepts_with_at_least_one_channel(self):
         """Should accept if at least one channel is active."""
