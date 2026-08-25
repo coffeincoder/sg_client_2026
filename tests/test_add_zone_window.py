@@ -71,6 +71,31 @@ class TestAddZoneWindowChannels(unittest.TestCase):
 
         self.assertEqual(w.result(), QDialog.Accepted)
 
+    def test_rename_also_requires_one_present_channel(self):
+        """Rename path must NOT bypass the min-1-present invariant: an operator
+        editing a device cannot save it with every channel unchecked (which
+        would silently leave the device with no channels to broadcast to)."""
+        w = UI_AddZoneWindow("test_zone", "1.1.1.1", [], channels=None,
+                             for_rename=True)
+
+        with mock.patch.object(QMessageBox, 'information') as info:
+            w.validate_and_accept()
+
+        self.assertNotEqual(w.result(), QDialog.Accepted)
+        self.assertIn('у устройства', info.call_args[0][2])
+
+    def test_rename_accepts_with_one_present_channel(self):
+        """Rename with at least one present channel is accepted."""
+        channels = [(True, "out1"), (False, ""), (False, ""), (False, ""),
+                    (False, ""), (False, ""), (False, ""), (False, "")]
+        w = UI_AddZoneWindow("test_zone", "1.1.1.1", [], channels=channels,
+                             for_rename=True)
+
+        with mock.patch.object(QMessageBox, 'information'):
+            w.validate_and_accept()
+
+        self.assertEqual(w.result(), QDialog.Accepted)
+
 
 if __name__ == "__main__":
     unittest.main()

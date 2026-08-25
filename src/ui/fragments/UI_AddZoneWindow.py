@@ -85,14 +85,18 @@ class UI_AddZoneWindow(QDialog):
         self.setLayout(self.main_layout)
 
     def validate_and_accept(self):
+        # Инвариант «минимум 1 present-канал» действует на ОБА пути —
+        # и создание, и переименование. Иначе оператор при редактировании
+        # мог бы снять все галочки и молча оставить устройство без каналов
+        # (панель пустая, play_variant = "", устройство перестаёт вещать).
+        if not any(present for present, _ in self.get_channels()):
+            QMessageBox.information(self, 'Уведомление.', 'Выберите хотя бы один канал у устройства!')
+            return
         if self.for_rename:
             self.accept()
         elif self.ip_field.text() != '' or self.name_field.text() != '':
             if any(zone.name == self.name_field.text() for zone in self.all_zones):
                 QMessageBox.information(self, 'Уведомление.', 'Зона с таким названием уже существует!')
-                return
-            if not any(present for present, _ in self.get_channels()):
-                QMessageBox.information(self, 'Уведомление.', 'Выберите хотя бы один канал у устройства!')
                 return
             self.accept()
 
