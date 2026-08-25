@@ -84,10 +84,17 @@ class ZoneListItem(QWidget):
         btn.setMenu(zone_menu)
         return btn
 
+    # Крупная галочка канала с воздухом между строками — под правило
+    # «крупные контролы для пожилых дежурных операторов».
+    _CHANNEL_CHECK_STYLE = (
+        "QCheckBox { padding: 3px; spacing: 8px; }"
+        "QCheckBox::indicator { width: 20px; height: 20px; }"
+    )
+
     def _build_subzones(self) -> QWidget:
         self.subzones_layout = QVBoxLayout()
-        self.subzones_layout.setSpacing(4)
-        self.subzones_layout.setContentsMargins(10, 2, 5, 2)
+        self.subzones_layout.setSpacing(10)
+        self.subzones_layout.setContentsMargins(10, 6, 5, 4)
 
         container = QWidget()
         container.setLayout(self.subzones_layout)
@@ -110,6 +117,7 @@ class ZoneListItem(QWidget):
                 continue
             name = getattr(self.zone, f"subzone{n}_name") or f"Канал {n}"
             chk = QCheckBox(name)
+            chk.setStyleSheet(self._CHANNEL_CHECK_STYLE)
             chk.setChecked(getattr(self.zone, f"subzone{n}"))
             chk.stateChanged.connect(functools.partial(self._on_channel_toggled, n))
             self.subzones_layout.addWidget(chk)
