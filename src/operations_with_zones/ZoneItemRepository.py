@@ -116,20 +116,31 @@ class ZoneItemRepository:
                         subzone3: Optional[bool] = None,
                         subzone4: Optional[bool] = None,
                         subzone3_name: Optional[str] = None,
-                        subzone4_name: Optional[str] = None):
+                        subzone4_name: Optional[str] = None,
+                        subzone5: Optional[bool] = None,
+                        subzone6: Optional[bool] = None,
+                        subzone7: Optional[bool] = None,
+                        subzone8: Optional[bool] = None,
+                        subzone5_name: Optional[str] = None,
+                        subzone6_name: Optional[str] = None,
+                        subzone7_name: Optional[str] = None,
+                        subzone8_name: Optional[str] = None,
+                        subzone1_present: Optional[bool] = None,
+                        subzone2_present: Optional[bool] = None,
+                        subzone3_present: Optional[bool] = None,
+                        subzone4_present: Optional[bool] = None,
+                        subzone5_present: Optional[bool] = None,
+                        subzone6_present: Optional[bool] = None,
+                        subzone7_present: Optional[bool] = None,
+                        subzone8_present: Optional[bool] = None):
         """
-        Обновляет состояние зоны и подзон
+        Обновляет состояние зоны и подзон (1..8: active/name/present)
         Args:
             zone_name: Имя зоны для обновления
             is_checked: Состояние главного чекбокса
-            subzone1: Состояние подзоны 1
-            subzone2: Состояние подзоны 2
-            subzone1_name: Название подзоны 1
-            subzone2_name: Название подзоны 2
-            subzone3: Состояние подзоны 3
-            subzone4: Состояние подзоны 4
-            subzone3_name: Название подзоны 3
-            subzone4_name: Название подзоны 4
+            subzone1..8: Состояние подзоны (active)
+            subzone1_name..8_name: Название подзоны
+            subzone1_present..8_present: Есть ли канал у устройства
         """
         zone = self.get_zone_by_name(zone_name)
         if zone:
@@ -151,6 +162,38 @@ class ZoneItemRepository:
                 zone.subzone3_name = subzone3_name
             if subzone4_name is not None:
                 zone.subzone4_name = subzone4_name
+            if subzone5 is not None:
+                zone.subzone5 = subzone5
+            if subzone6 is not None:
+                zone.subzone6 = subzone6
+            if subzone7 is not None:
+                zone.subzone7 = subzone7
+            if subzone8 is not None:
+                zone.subzone8 = subzone8
+            if subzone5_name is not None:
+                zone.subzone5_name = subzone5_name
+            if subzone6_name is not None:
+                zone.subzone6_name = subzone6_name
+            if subzone7_name is not None:
+                zone.subzone7_name = subzone7_name
+            if subzone8_name is not None:
+                zone.subzone8_name = subzone8_name
+            if subzone1_present is not None:
+                zone.subzone1_present = subzone1_present
+            if subzone2_present is not None:
+                zone.subzone2_present = subzone2_present
+            if subzone3_present is not None:
+                zone.subzone3_present = subzone3_present
+            if subzone4_present is not None:
+                zone.subzone4_present = subzone4_present
+            if subzone5_present is not None:
+                zone.subzone5_present = subzone5_present
+            if subzone6_present is not None:
+                zone.subzone6_present = subzone6_present
+            if subzone7_present is not None:
+                zone.subzone7_present = subzone7_present
+            if subzone8_present is not None:
+                zone.subzone8_present = subzone8_present
             self._save_all_zones()
 
     def get_all(self) -> List[Orange]:

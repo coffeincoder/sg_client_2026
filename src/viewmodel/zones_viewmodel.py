@@ -16,6 +16,7 @@ from src.data.OrangeStatus import OrangeStatus
 from src.data.ZoneModel import Orange
 from src.ui.fragments.UI_AddZoneWindow import UI_AddZoneWindow
 from src.utils.logger_config import setup_logger
+from src.viewmodel.channel_utils import resolve_active
 from time import sleep
 
 logger = setup_logger()
@@ -107,20 +108,21 @@ class ZonesViewModel(QObject):
             for zone in self.view.ZONE_LIST:
                 if selected_zone.name == zone.name:
                     channels = [
-                        (zone.subzone1, zone.subzone1_name),
-                        (zone.subzone2, zone.subzone2_name),
-                        (zone.subzone3, zone.subzone3_name),
-                        (zone.subzone4, zone.subzone4_name),
+                        (getattr(zone, f"subzone{n}_present"), getattr(zone, f"subzone{n}_name"))
+                        for n in range(1, 9)
                     ]
                     addZoneDialog = UI_AddZoneWindow(zone.name, zone.ip, self.view.ZONE_LIST, channels, True)
                     if addZoneDialog.exec() == QDialog.Accepted:
                         zone.name = addZoneDialog.get_name_field().text()
                         zone.ip = addZoneDialog.get_ip_field().text()
                         ch = addZoneDialog.get_channels()
-                        zone.subzone1, zone.subzone1_name = ch[0]
-                        zone.subzone2, zone.subzone2_name = ch[1]
-                        zone.subzone3, zone.subzone3_name = ch[2]
-                        zone.subzone4, zone.subzone4_name = ch[3]
+                        for n in range(1, 9):
+                            was_present = getattr(zone, f"subzone{n}_present")
+                            was_active = getattr(zone, f"subzone{n}")
+                            is_present, name = ch[n - 1]
+                            setattr(zone, f"subzone{n}_present", is_present)
+                            setattr(zone, f"subzone{n}_name", name)
+                            setattr(zone, f"subzone{n}", resolve_active(was_present, is_present, was_active))
 
             self.view.zones_repo.save(self.view.ZONE_LIST)
 
@@ -147,11 +149,12 @@ class ZonesViewModel(QObject):
                 ip=ip_field.text(),
                 name=name_field.text(),
                 isChecked=True,
-                subzone1=channels[0][0], subzone1_name=channels[0][1],
-                subzone2=channels[1][0], subzone2_name=channels[1][1],
-                subzone3=channels[2][0], subzone3_name=channels[2][1],
-                subzone4=channels[3][0], subzone4_name=channels[3][1],
             )
+            for n in range(1, 9):
+                present, name = channels[n - 1]
+                setattr(new_zone, f"subzone{n}_present", present)
+                setattr(new_zone, f"subzone{n}_name", name)
+                setattr(new_zone, f"subzone{n}", resolve_active(False, present, False))
 
             if name_field.text() == "" or ip_field.text() == "":
                 QMessageBox.information(self.view, 'Уведомление.',
