@@ -5,7 +5,10 @@ from src.viewmodel.channel_utils import active_channels, format_play_variant
 
 class TestChannelUtils(unittest.TestCase):
     def test_active_channels_mixed(self):
-        z = Orange(subzone1=True, subzone2=False, subzone3=True, subzone4=True)
+        z = Orange(subzone1=True, subzone1_present=True,
+                   subzone2=False, subzone2_present=True,
+                   subzone3=True, subzone3_present=True,
+                   subzone4=True, subzone4_present=True)
         self.assertEqual(active_channels(z), [1, 3, 4])
 
     def test_active_channels_none(self):
