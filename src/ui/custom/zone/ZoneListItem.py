@@ -1,4 +1,5 @@
 import datetime
+import functools
 import json
 import logging
 import os.path
@@ -83,43 +84,40 @@ class ZoneListItem(QWidget):
         btn.setMenu(zone_menu)
         return btn
 
-    _SUBZONE_LABEL_STYLE = "QLabel { font-size: 11px; padding: 4px; background: transparent; }"
-
-    def _active_channel_names(self) -> list:
-        """Возвращает подписи активных каналов (1..4) для текущей зоны."""
-        names = []
-        for n in range(1, 5):
-            if getattr(self.zone, f"subzone{n}"):
-                names.append(getattr(self.zone, f"subzone{n}_name") or f"Канал {n}")
-        return names
-
     def _build_subzones(self) -> QWidget:
-        self.subzones_layout = QHBoxLayout()
-        self.subzones_layout.addStretch()
-        self.subzones_layout.setSpacing(10)
+        self.subzones_layout = QVBoxLayout()
+        self.subzones_layout.setSpacing(4)
         self.subzones_layout.setContentsMargins(10, 2, 5, 2)
 
         container = QWidget()
         container.setLayout(self.subzones_layout)
         container.setStyleSheet("background: transparent;")
         self.subzones_container = container
-        self._rebuild_subzone_labels()
+        self._rebuild_subzone_checkboxes()
         return container
 
-    def _rebuild_subzone_labels(self) -> None:
-        """Перестраивает read-only подписи активных каналов из self.zone."""
+    def _rebuild_subzone_checkboxes(self) -> None:
+        """Перестраивает интерактивные галочки active для present-каналов зоны."""
         while self.subzones_layout.count():
             item = self.subzones_layout.takeAt(0)
             widget = item.widget()
             if widget is not None:
                 widget.deleteLater()
 
-        for name in self._active_channel_names():
-            label = QLabel(name)
-            label.setStyleSheet(self._SUBZONE_LABEL_STYLE)
-            self.subzones_layout.addWidget(label)
+        self.channel_checks = {}
+        for n in range(1, 9):
+            if not getattr(self.zone, f"subzone{n}_present"):
+                continue
+            name = getattr(self.zone, f"subzone{n}_name") or f"Канал {n}"
+            chk = QCheckBox(name)
+            chk.setChecked(getattr(self.zone, f"subzone{n}"))
+            chk.stateChanged.connect(functools.partial(self._on_channel_toggled, n))
+            self.subzones_layout.addWidget(chk)
+            self.channel_checks[n] = chk
 
-        self.subzones_layout.addStretch()
+    def _on_channel_toggled(self, n: int, state) -> None:
+        setattr(self.zone, f"subzone{n}", state == Qt.Checked)
+        self.save_zone_state()
 
     def _assemble_layouts(self) -> None:
         self.checkbox = QCheckBox()
@@ -190,14 +188,10 @@ class ZoneListItem(QWidget):
         else:
             self.setStyleSheet("")
 
-    def update_subzone_labels(self):
-        """Перестраивает подписи активных каналов из данных зоны"""
-        self._rebuild_subzone_labels()
-
     def update_zone_data(self, zone: Orange):
         """Обновляет данные зоны и перерисовывает интерфейс"""
         self.zone = zone
-        self.update_subzone_labels()
+        self._rebuild_subzone_checkboxes()
         self.checkbox.setChecked(zone.isChecked)
         self.online_status_label.setText("Онлайн" if zone.is_online else "Не в сети")
         self.zone_ip_label.setText(zone.ip)
@@ -238,14 +232,10 @@ class ZoneListItem(QWidget):
             for zone in zones:
                 if zone['name'] == self.zone.name:
                     zone['isChecked'] = self.zone.isChecked
-                    zone['subzone1'] = self.zone.subzone1
-                    zone['subzone2'] = self.zone.subzone2
-                    zone['subzone3'] = self.zone.subzone3
-                    zone['subzone4'] = self.zone.subzone4
-                    zone['subzone1_name'] = self.zone.subzone1_name
-                    zone['subzone2_name'] = self.zone.subzone2_name
-                    zone['subzone3_name'] = self.zone.subzone3_name
-                    zone['subzone4_name'] = self.zone.subzone4_name
+                    for n in range(1, 9):
+                        zone[f'subzone{n}'] = getattr(self.zone, f'subzone{n}')
+                        zone[f'subzone{n}_present'] = getattr(self.zone, f'subzone{n}_present')
+                        zone[f'subzone{n}_name'] = getattr(self.zone, f'subzone{n}_name')
 
             with open(zones_json, 'w') as file:
                 json.dump(zones, file, indent=4)
