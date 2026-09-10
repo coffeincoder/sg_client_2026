@@ -368,7 +368,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                            text='',
                                            loop=loop,
                                            vol=volume,
-                                           overload_value=overload_value
+                                           overload_value=overload_value,
+                                           mode='file'
                                            )
                 # self.now_playing.change_gif(f'{paths.img_files}{paths.sep}spec.gif')
 
@@ -404,7 +405,8 @@ class  MainWindow(QtWidgets.QMainWindow, Ui_MainWindow):
                                            text='',
                                            loop=loop,
                                            vol=volume,
-                                           overload_value=overload_value
+                                           overload_value=overload_value,
+                                           mode='scenario'
                                            )
                 # self.now_playing.change_gif(f'{paths.img_files}{paths.sep}spec.gif')
 

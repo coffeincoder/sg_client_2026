@@ -94,7 +94,8 @@ class PlaybackViewModel(QObject):
             loop=None,
             vol=None,
             overload_value=0,
-            is_rtp=False
+            is_rtp=False,
+            mode='file'
     ):
         if is_rtp:
             logger.info("__RTP")
@@ -125,7 +126,8 @@ class PlaybackViewModel(QObject):
                     file_path=filename,
                     vol=vol,
                     overload_value=overload_value,
-                    play_variant=_play_variant
+                    play_variant=_play_variant,
+                    mode=mode
                 )
 
                 t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
@@ -163,7 +165,8 @@ class PlaybackViewModel(QObject):
             loop=None,
             vol=None,
             overload_value=0,
-            is_rtp=False
+            is_rtp=False,
+            mode='scenario'
     ):
         if is_rtp:
             logger.info("__RTP")
@@ -196,7 +199,8 @@ class PlaybackViewModel(QObject):
                     loop=loop,
                     file_path=os.path.join(paths.mp3_files,item.file.filename),
                     vol=vol,
-                    overload_value=overload_value
+                    overload_value=overload_value,
+                    mode=mode
                 )
 
                 t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
