@@ -71,12 +71,32 @@ class ZoneLayoutManager:
         """)
         combobox.setView(list_view)
 
+    def _bind_group(self, group):
+        """Связывает combo-box'ы одной группы: выбор в любом боксе группы
+        проставляет тот же файл во все остальные боксы этой группы.
+        Флаг self._autofill_guard защищает от рекурсии сигналов."""
+        def make_handler(src):
+            def on_changed(_idx):
+                if getattr(self, "_autofill_guard", False):
+                    return
+                self._autofill_guard = True
+                try:
+                    text = src.currentText()
+                    for cb in group:
+                        if cb is not src:
+                            cb.setCurrentText(text)
+                finally:
+                    self._autofill_guard = False
+            return on_changed
+        for cb in group:
+            cb.currentIndexChanged.connect(make_handler(cb))
+
     def scen_save(self):
         scenario_items = []
-        for layout in self.main_window.scen_layouts:
-            zone_label = layout.itemAt(0).widget().text()
-            combox_main = layout.itemAt(1).widget()
-            combox_esp = layout.itemAt(2).widget()
+        for group_combos in self.main_window.scen_group_combos:
+            zone_label = group_combos['zone'].text()
+            combox_main = group_combos['g1'][0]
+            combox_esp = group_combos['g2'][0]
 
             selected_file = combox_main.currentText()
             selected_file_esp = combox_esp.currentText() or ""
@@ -105,15 +125,15 @@ class ZoneLayoutManager:
         if not scenario:
             return
 
-        for layout in self.main_window.scen_layouts:
-            zone_label = layout.itemAt(0).widget().text()
-            combox_main = layout.itemAt(1).widget()
-            combox_esp = layout.itemAt(2).widget()
+        for group_combos in self.main_window.scen_group_combos:
+            zone_label = group_combos['zone'].text()
 
             saved_item = next((item for item in scenario.ScenarioItems if item.zone == zone_label), None)
             if saved_item:
-                combox_main.setCurrentText(saved_item.file)
-                combox_esp.setCurrentText(saved_item.file_esp)
+                for cb in group_combos['g1']:
+                    cb.setCurrentText(saved_item.file)
+                for cb in group_combos['g2']:
+                    cb.setCurrentText(saved_item.file_esp)
 
         self.main_window.scenario_title_edit.setText(scenario.scenarioName)
 
@@ -202,6 +222,7 @@ class ZoneLayoutManager:
             return
 
         self.main_window.scen_layouts = []
+        self.main_window.scen_group_combos = []
 
         layout = QVBoxLayout()
         layout.setAlignment(Qt.AlignTop)
@@ -365,17 +386,21 @@ class ZoneLayoutManager:
         lbl_zone.setStyleSheet("font-weight: bold; color: #ECEFF4;")
         lbl_zone.setFixedWidth(130)
 
-        lbl_chan1 = QLabel("Первый канал")
-        lbl_chan1.setFont(QFont("Arial", 11))
-        lbl_chan1.setStyleSheet("font-weight: bold; color: #ECEFF4;")
+        lbl_group1 = QLabel("Orange (линии 1-4)")
+        lbl_group1.setFont(QFont("Arial", 11))
+        lbl_group1.setStyleSheet("font-weight: bold; color: #ECEFF4;")
 
-        lbl_chan2 = QLabel("Второй канал")
-        lbl_chan2.setFont(QFont("Arial", 11))
-        lbl_chan2.setStyleSheet("font-weight: bold; color: #ECEFF4;")
+        lbl_group_gap = QLabel("")
+        lbl_group_gap.setFixedWidth(12)
+
+        lbl_group2 = QLabel("ESP32 (линии 5-8)")
+        lbl_group2.setFont(QFont("Arial", 11))
+        lbl_group2.setStyleSheet("font-weight: bold; color: #ECEFF4;")
 
         header_layout.addWidget(lbl_zone)
-        header_layout.addWidget(lbl_chan1, 1)
-        header_layout.addWidget(lbl_chan2, 1)
+        header_layout.addWidget(lbl_group1, 4)
+        header_layout.addWidget(lbl_group_gap)
+        header_layout.addWidget(lbl_group2, 4)
         group_layout.addLayout(header_layout)
 
         # --- Добавление зон ---
@@ -397,28 +422,43 @@ class ZoneLayoutManager:
                     padding: 8px 5px;
                 }
             """)
-
-            combox_chan1 = QComboBox()
-            combox_chan1.setFont(QFont("Arial", 11))
-            combox_chan1.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            self.setup_combobox_style(combox_chan1)
-            combox_chan1.addItems(headers)
-            combox_chan1.setToolTip("Аудиофайл для первого канала")
-
-            combox_chan2 = QComboBox()
-            combox_chan2.setFont(QFont("Arial", 11))
-            combox_chan2.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
-            self.setup_combobox_style(combox_chan2)
-            combox_chan2.addItems([""] + headers)
-            combox_chan2.setToolTip("Аудиофайл для второго канала (необязательно)")
-
             horizontal_layout.addWidget(zone_label)
-            horizontal_layout.addWidget(combox_chan1, 1)
-            horizontal_layout.addWidget(combox_chan2, 1)
-            combox_chan1.setFixedWidth(320)
-            combox_chan2.setFixedWidth(320)
+
+            group1_combos = []
+            group2_combos = []
+
+            for line_num in range(1, 9):
+                combox = QComboBox()
+                combox.setFont(QFont("Arial", 11))
+                combox.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Fixed)
+                self.setup_combobox_style(combox)
+                combox.addItems([""] + headers)
+                combox.setMinimumWidth(90)
+
+                if line_num <= 4:
+                    combox.setToolTip(f"Orange, линия {line_num}")
+                    group1_combos.append(combox)
+                else:
+                    combox.setToolTip(f"ESP32, линия {line_num}")
+                    group2_combos.append(combox)
+
+                horizontal_layout.addWidget(combox, 1)
+
+                if line_num == 4:
+                    gap = QLabel("")
+                    gap.setFixedWidth(12)
+                    horizontal_layout.addWidget(gap)
+
+            self._bind_group(group1_combos)
+            self._bind_group(group2_combos)
+
             group_layout.addLayout(horizontal_layout)
             self.main_window.scen_layouts.append(horizontal_layout)
+            self.main_window.scen_group_combos.append({
+                'zone': zone_label,
+                'g1': group1_combos,
+                'g2': group2_combos,
+            })
 
         group_layout.addStretch()
 
