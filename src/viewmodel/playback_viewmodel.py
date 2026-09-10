@@ -35,6 +35,11 @@ def should_send_esp(file_esp):
     return bool(file_esp and str(file_esp).strip())
 
 
+def should_send_orange(file_obj):
+    """Слать ли Orange-файл: только если объект файла есть и у него непустое имя."""
+    return bool(file_obj is not None and getattr(file_obj, "filename", None))
+
+
 class PlaybackViewModel(QObject):
     """ViewModel для фичи «Воспроизведение/Orange/Realtime».
     Принимает ссылку на View для доступа к виджетам и состоянию потоков
@@ -193,28 +198,29 @@ class PlaybackViewModel(QObject):
                 print(item)
                 # Получаем объект Orange
                 print(item.zone.ip)
-                print(item.file.filename)
+                print(item.file.filename if should_send_orange(item.file) else None)
 
                 #self.progress_indicator.indicate()
                 #logger.info(f"commit_command({command}): зона '{zone.name}|{zone.ip}' установлена")
-                t = OrangeWorkerTCP(
-                    command=command,
-                    ip=str(item.zone.ip),
-                    text=text,
-                    loop=loop,
-                    file_path=os.path.join(paths.mp3_files,item.file.filename),
-                    vol=vol,
-                    overload_value=overload_value,
-                    mode=mode
-                )
+                if should_send_orange(item.file):
+                    t = OrangeWorkerTCP(
+                        command=command,
+                        ip=str(item.zone.ip),
+                        text=text,
+                        loop=loop,
+                        file_path=os.path.join(paths.mp3_files, item.file.filename),
+                        vol=vol,
+                        overload_value=overload_value,
+                        mode=mode
+                    )
 
-                t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
-                t.status.connect(self.tcp_orange_callback_status)
-                t.signal_progress_bar.connect(self.view.progress_update)
-                t.success_rtp_signal.connect(self.on_orange_success)
-                t.final_signal.connect(self.on_orange_finished)
-                t.online_check.connect(self.view.update_online_status)
-                thread_list.append(t)
+                    t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
+                    t.status.connect(self.tcp_orange_callback_status)
+                    t.signal_progress_bar.connect(self.view.progress_update)
+                    t.success_rtp_signal.connect(self.on_orange_success)
+                    t.final_signal.connect(self.on_orange_finished)
+                    t.online_check.connect(self.view.update_online_status)
+                    thread_list.append(t)
 
                 esp_filename = getattr(item, "file_esp_filename", None)
                 if should_send_esp(esp_filename):
