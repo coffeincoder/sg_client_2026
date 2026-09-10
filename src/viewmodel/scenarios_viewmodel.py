@@ -67,11 +67,13 @@ class ScenariosViewModel(QObject):
                 # Восстанавливаем объект FileItem (файл)
                 file_data = item.get("file_data")
                 file_obj = FileItem.from_json(file_data) if file_data else None
+                esp_filename = (file_data or {}).get("filename_esp")
 
                 # Создаем объект сценария (предполагается, что у вас есть соответствующий класс)
                 scenario_item = ScenarioItem(
                     zone=zone_obj,
-                    file=file_obj
+                    file=file_obj,
+                    file_esp_filename=esp_filename,
                 )
 
                 scenario_items.append(scenario_item)

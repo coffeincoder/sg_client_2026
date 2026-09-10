@@ -30,6 +30,11 @@ from src.viewmodel.channel_utils import active_channels, format_play_variant
 logger = setup_logger()
 
 
+def should_send_esp(file_esp):
+    """Слать ли ESP-файл в сценарии: только при непустом имени."""
+    return bool(file_esp and str(file_esp).strip())
+
+
 class PlaybackViewModel(QObject):
     """ViewModel для фичи «Воспроизведение/Orange/Realtime».
     Принимает ссылку на View для доступа к виджетам и состоянию потоков
@@ -210,6 +215,20 @@ class PlaybackViewModel(QObject):
                 t.final_signal.connect(self.on_orange_finished)
                 t.online_check.connect(self.view.update_online_status)
                 thread_list.append(t)
+
+                esp_filename = getattr(item, "file_esp_filename", None)
+                if should_send_esp(esp_filename):
+                    esp_worker = OrangeWorkerTCP(
+                        command='play_esp',
+                        ip=str(item.zone.ip),
+                        text=text,
+                        loop=loop,
+                        file_path=os.path.join(paths.mp3_files, esp_filename),
+                        vol=vol,
+                        overload_value=overload_value,
+                    )
+                    thread_list.append(esp_worker)
+
                 logger.info(
                     f"commit_command({command}): список потоков для команды ({len(thread_list)}) : {thread_list}")
 
