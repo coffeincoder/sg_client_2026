@@ -61,6 +61,11 @@ def create_simple_command(ip, port, timeout, command):
     return message
 
 
+def build_play_command(filename, mode='file'):
+    """Команда play с режимом воспроизведения (mode: 'file' | 'scenario')."""
+    return {"command": "play", "filename": filename, "mode": mode}
+
+
 class OrangeWorkerTCP(QThread):
     status = pyqtSignal(str, str)
     signal = pyqtSignal(str, int)
@@ -69,7 +74,7 @@ class OrangeWorkerTCP(QThread):
     final_signal = pyqtSignal(bool)
     online_check = pyqtSignal(bool, str)
 
-    def __init__(self, command, ip, text, file_path=None, loop=None, vol=None, overload_value=None, play_variant=None):
+    def __init__(self, command, ip, text, file_path=None, loop=None, vol=None, overload_value=None, play_variant=None, mode='file'):
         QThread.__init__(self)
         self.command = command
         self.ip = ip
@@ -80,6 +85,7 @@ class OrangeWorkerTCP(QThread):
         self.text = text
         self.overload_value = overload_value
         self.play_variant = play_variant
+        self.mode = mode
 
     def emit_status(self, msg, ip):
         self.status.emit(msg, ip)
@@ -132,7 +138,7 @@ class OrangeWorkerTCP(QThread):
                 with create_socket(ip, port, self.timeout) as client_socket:
                     client_socket.settimeout(5)
                     response = send_command(client_socket,
-                                            {"command": 'play', "filename": os.path.basename(self.file_path)},
+                                            build_play_command(os.path.basename(self.file_path), self.mode),
                                             ip)
 
                     if response == 'battery_low':
