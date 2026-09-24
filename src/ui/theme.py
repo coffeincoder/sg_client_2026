@@ -124,6 +124,13 @@ QComboBox::drop-down {{ border: none; width: 22px; }}
 QComboBox QAbstractItemView {{ background: {t.elev}; border: 1px solid {t.border};
         selection-background-color: {t.accent}; outline: none; }}
 
+/* контекстные меню (шестерёнка зоны и пр.) — явные цвета, иначе дефолтная
+   палитра даёт нечитаемый текст в тёмной теме (по-разному на Mac/Windows) */
+QMenu {{ background: {t.card}; color: {t.text}; border: 1px solid {t.border}; border-radius: 8px; }}
+QMenu::item {{ padding: 6px 18px; }}
+QMenu::item:selected {{ background: {t.accent}; color: white; }}
+QMenu::separator {{ height: 1px; background: {t.border}; margin: 4px 8px; }}
+
 /* спинбокс — видимые кнопки +/- со стрелками */
 QSpinBox {{ padding-right: 22px; }}
 QSpinBox::up-button {{ subcontrol-origin: border; subcontrol-position: top right; width: 20px;
