@@ -72,24 +72,28 @@ class ZoneLayoutManager:
         combobox.setView(list_view)
 
     def _bind_group(self, group):
-        """Связывает combo-box'ы одной группы: выбор в любом боксе группы
-        проставляет тот же файл во все остальные боксы этой группы.
+        """Автозаполнение группы ТОЛЬКО от первого combo-box'а: выбор файла в
+        первом боксе группы проставляет его в остальные (2-4) как удобный
+        дефолт. Боксы 2-4 дальше НЕЗАВИСИМЫ — их изменение никого не цепляет.
         Флаг self._autofill_guard защищает от рекурсии сигналов."""
-        def make_handler(src):
-            def on_changed(_idx):
-                if getattr(self, "_autofill_guard", False):
-                    return
-                self._autofill_guard = True
-                try:
-                    text = src.currentText()
-                    for cb in group:
-                        if cb is not src:
-                            cb.setCurrentText(text)
-                finally:
-                    self._autofill_guard = False
-            return on_changed
-        for cb in group:
-            cb.currentIndexChanged.connect(make_handler(cb))
+        if len(group) < 2:
+            return
+        first = group[0]
+        rest = group[1:]
+
+        def on_first_changed(_idx):
+            if getattr(self, "_autofill_guard", False):
+                return
+            self._autofill_guard = True
+            try:
+                text = first.currentText()
+                for cb in rest:
+                    cb.setCurrentText(text)
+            finally:
+                self._autofill_guard = False
+
+        first.currentIndexChanged.connect(on_first_changed)
+        # боксы 2-4 (rest) обработчик НЕ получают -> независимы
 
     def scen_save(self):
         scenario_items = []
