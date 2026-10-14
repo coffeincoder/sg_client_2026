@@ -63,6 +63,9 @@ def app_stylesheet(theme: str = "dark") -> str:
     return f"""
 * {{ font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif; font-size: 13px; color: {t.text}; }}
 QMainWindow, QWidget#root {{ background: {t.bg}; }}
+/* окна сообщений и диалоги — явный фон, иначе берут светлую системную палитру
+   (Linux/Windows) при светлом тексте из `*` -> текст невидим, «пустое окно» */
+QMessageBox, QDialog {{ background: {t.card}; }}
 
 /* карточки */
 QFrame#card {{ background: {t.card}; border: 1px solid {t.border}; border-radius: 12px; }}
