@@ -17,6 +17,7 @@ vol = f'INI{sep}vol.txt'
 grid = f'INI{sep}grid.txt'
 project = f'INI{sep}project.txt'
 log_file = f'logs{sep}ksb_SG.log'
+DIAG_TONE_FREQ = 1000  # частота диагностического тона (Гц), Ctrl+Shift+T
 
 logger.info(f'init paths :\n{mp3_files}\n{img_files}\n{data_scenaries_json}\n{zones_json}\n{ogg_files}\n')
 logger.info(f'current_dir - {current_dir}')

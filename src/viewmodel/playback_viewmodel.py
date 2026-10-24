@@ -48,6 +48,7 @@ class PlaybackViewModel(QObject):
     def __init__(self, view):
         super().__init__()
         self.view = view
+        self.is_tone_playing = False
         # NOTE: self.view.play_threads / stop_threads / realtime_play_threads /
         # stop_realtime_threads / success_IPs / finished_threads /
         # is_streaming_flag / audio_streamer / status_sender
@@ -105,7 +106,8 @@ class PlaybackViewModel(QObject):
             vol=None,
             overload_value=0,
             is_rtp=False,
-            mode='file'
+            mode='file',
+            freq=None
     ):
         if is_rtp:
             logger.info("__RTP")
@@ -137,7 +139,8 @@ class PlaybackViewModel(QObject):
                     vol=vol,
                     overload_value=overload_value,
                     play_variant=_play_variant,
-                    mode=mode
+                    mode=mode,
+                    freq=freq
                 )
 
                 t.signal.connect(self.indicate_file_played_on_orange)  # подключите функцию, которая обновит GUI
@@ -261,6 +264,22 @@ class PlaybackViewModel(QObject):
         if self.view.finished_threads == len(self.view.realtime_play_threads):
             self.start_rtp_session(self.view.success_IPs)
             self.view.finished_threads = 0
+
+    def toggle_test_tone(self):
+        """Ctrl+Shift+T: старт/стоп диагностического синуса на checked-зонах."""
+        if self.is_tone_playing:
+            self.orange_stop()
+            self.is_tone_playing = False
+            logger.info("TEST_TONE: стоп")
+        else:
+            self.commit_orange_command(
+                "test_tone",
+                self.view.play_threads,
+                freq=paths.DIAG_TONE_FREQ,
+                vol=self.view.volume_slider.value(),
+            )
+            self.is_tone_playing = True
+            logger.info(f"TEST_TONE: старт {paths.DIAG_TONE_FREQ} Гц")
 
     def orange_stop(self):
         """stop operations 2"""
