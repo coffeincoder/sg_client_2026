@@ -52,7 +52,7 @@ class TtsViewModel(QObject):
         input_text = self.view.main_text_edit_field.toPlainText()
 
         if input_text != '':
-            if len(input_text) < 250:
+            if len(input_text) < 700:
                 settings_dict = settings()
 
                 TOKEN = settings_dict["iam_token"]
