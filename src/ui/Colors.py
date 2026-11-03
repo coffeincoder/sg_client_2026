@@ -1,3 +1,4 @@
+#init
 class Light:
     background_color = "#c7d6ff"
     blue = "#2979FE"
