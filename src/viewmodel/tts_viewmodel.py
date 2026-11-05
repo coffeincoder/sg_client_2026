@@ -61,7 +61,7 @@ class TtsViewModel(QObject):
                 TEXT = input_text.replace('//', '')
                 short_voice = f"{VOICE[0]}{EMOTION[0]}"
 
-                file_name_without_extension = f"{short_voice}{last_five_chars_of_datetime_timestamp()}_{self.view.main_text_edit_field.toPlainText()[:250]}"
+                file_name_without_extension = f"{short_voice}{last_five_chars_of_datetime_timestamp()}_{self.view.main_text_edit_field.toPlainText()[:700]}"
                 file_name = f"{sanitize_filename(file_name_without_extension)}.mp3"
 
                 file_path = os.path.join(mp3_files, file_name)
